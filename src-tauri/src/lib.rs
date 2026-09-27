@@ -318,6 +318,8 @@ pub fn run() {
             let app_for_close = app.handle().clone();
             let db_for_pos = db.clone();
             let win_for_pos = main_window.clone();
+            // Geometry persistence debounce: highest generation wins.
+            let geom_generation = std::sync::Arc::new(std::sync::atomic::AtomicU64::new(0));
             main_window.on_window_event(move |event| {
                 match event {
                     tauri::WindowEvent::CloseRequested { api, .. } => {
@@ -339,23 +341,32 @@ pub fn run() {
                             }
                         }
                     }
-                    tauri::WindowEvent::Moved(pos) => {
-                        if let Ok(conn) = db_for_pos.lock() {
-                            let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
-                            let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
-                        }
-                    }
-                    tauri::WindowEvent::Resized(size) => {
-                        if let Ok(conn) = db_for_pos.lock() {
-                            let _ = settings::save_setting(&conn, "window_width", &size.width.to_string());
-                            let _ = settings::save_setting(&conn, "window_height", &size.height.to_string());
-                            // Also capture position, since some window managers shift the
-                            // window origin when resizing.
-                            if let Ok(pos) = win_for_pos.outer_position() {
-                                let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
-                                let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                    // Debounced geometry persistence: Moved/Resized fire many times
+                    // per drag; synchronous writes on every event would hold the
+                    // global DB lock on the event-loop thread. Coalesce instead —
+                    // only the thread holding the latest generation writes, 400ms
+                    // after the last event.
+                    tauri::WindowEvent::Moved(_) | tauri::WindowEvent::Resized(_) => {
+                        use std::sync::atomic::Ordering;
+                        let gen = geom_generation.fetch_add(1, Ordering::SeqCst) + 1;
+                        let win = win_for_pos.clone();
+                        let db = db_for_pos.clone();
+                        let gen_counter = std::sync::Arc::clone(&geom_generation);
+                        std::thread::spawn(move || {
+                            std::thread::sleep(std::time::Duration::from_millis(400));
+                            // A newer event superseded this one; its thread writes.
+                            if gen_counter.load(Ordering::SeqCst) != gen {
+                                return;
                             }
-                        }
+                            if let (Ok(pos), Ok(size)) = (win.outer_position(), win.inner_size()) {
+                                if let Ok(conn) = db.lock() {
+                                    let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
+                                    let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                                    let _ = settings::save_setting(&conn, "window_width", &size.width.to_string());
+                                    let _ = settings::save_setting(&conn, "window_height", &size.height.to_string());
+                                }
+                            }
+                        });
                     }
                     _ => {}
                 }

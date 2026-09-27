@@ -152,8 +152,19 @@ pub async fn stop(state: &Arc<WsState>) {
 
 async fn ws_handler(
     ws: WebSocketUpgrade,
+    headers: axum::http::HeaderMap,
     AxumState(state): AxumState<ServerState>,
 ) -> impl IntoResponse {
+    // Cross-site WebSocket hijacking hardening: any web page can attempt
+    // ws://127.0.0.1 connections (the WS handshake is not bound by the
+    // same-origin policy). Browser clients always send an Origin header —
+    // reject http(s) origins; Tauri/non-browser clients send none.
+    if let Some(origin) = headers.get(axum::http::header::ORIGIN).and_then(|v| v.to_str().ok()) {
+        if origin.starts_with("http://") || origin.starts_with("https://") {
+            log::warn!("[ws] rejected cross-origin client: {origin}");
+            return (axum::http::StatusCode::FORBIDDEN, "cross-origin not allowed").into_response();
+        }
+    }
     ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 

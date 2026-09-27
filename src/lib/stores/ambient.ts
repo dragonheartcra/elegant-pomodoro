@@ -69,12 +69,18 @@ function sync() {
 async function playAll() {
   shouldPlay = true;
   // Start all loops in parallel — a slow network loop must not delay the rest.
+  // An element that errored earlier (offline blip, dead URL) is reset and
+  // re-fetched here, so recovery happens automatically on the next play.
   await Promise.allSettled(
-    [...instances.entries()].map(([id, el]) =>
-      el.play().catch((e) => {
+    [...instances.entries()].map(([id, el]) => {
+      if (el.error) {
+        el.src = loopUrl(id);
+        el.load();
+      }
+      return el.play().catch((e) => {
         void logError(`[ambient] play() rejected for ${id}: ${e}`);
-      })
-    )
+      });
+    })
   );
 }
 

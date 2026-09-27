@@ -60,6 +60,43 @@ let consecutiveErrors = 0;
 /** timer:started/resumed arrived before FlowTunes data finished loading. */
 let pendingStart = false;
 
+// --- Stall watchdog ---------------------------------------------------------
+// A silently dropped connection (no TCP RST) never fires 'error' — the audio
+// element just stops making progress while isPlaying stays true. Watch the
+// playback clock: ~15s without advancement counts as a failure.
+let watchdog: ReturnType<typeof setInterval> | null = null;
+let watchdogLastTime = -1;
+let watchdogStallChecks = 0;
+
+function stopStallWatchdog() {
+  if (watchdog) {
+    clearInterval(watchdog);
+    watchdog = null;
+  }
+}
+
+function startStallWatchdog() {
+  stopStallWatchdog();
+  watchdogLastTime = -1;
+  watchdogStallChecks = 0;
+  watchdog = setInterval(() => {
+    const a = audio;
+    if (!a || a.paused) return;
+    if (a.currentTime === watchdogLastTime) {
+      watchdogStallChecks += 1;
+      if (watchdogStallChecks >= 3) {
+        void logError(`[music] playback stalled ~15s with no progress: ${a.src}`);
+        consecutiveErrors += 1;
+        if (consecutiveErrors <= 3) nextTrack(true);
+        else stop();
+      }
+    } else {
+      watchdogStallChecks = 0;
+      watchdogLastTime = a.currentTime;
+    }
+  }, 5000);
+}
+
 function publish(patch: Partial<MusicState>) {
   musicState.update((s) => {
     const next = { ...s, ...patch };
@@ -134,12 +171,15 @@ async function play(): Promise<boolean> {
     // playing — trust the element state, not the promise result.
     if (getAudio().paused) {
       publish({ isPlaying: false });
+      stopStallWatchdog();
       return false;
     }
+    startStallWatchdog();
     publish({ isPlaying: true });
     return true;
   } catch (e) {
     void logError(`[music] play() rejected: ${e}`);
+    stopStallWatchdog();
     publish({ isPlaying: false });
     return false;
   }
@@ -148,10 +188,12 @@ async function play(): Promise<boolean> {
 function pause() {
   if (!audio) return;
   audio.pause();
+  stopStallWatchdog();
   publish({ isPlaying: false });
 }
 
 function stop() {
+  stopStallWatchdog();
   if (audio) {
     audio.pause();
     audio.removeAttribute('src');

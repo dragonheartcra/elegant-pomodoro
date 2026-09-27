@@ -450,7 +450,16 @@ pub fn audio_set_custom(
     let ext = src
         .extension()
         .and_then(|e| e.to_str())
-        .unwrap_or("mp3");
+        .and_then(|e| {
+            // Whitelist the extension so the copied file name in the
+            // audio dir can never contain unexpected characters.
+            let e = e.to_ascii_lowercase();
+            let valid = !e.is_empty()
+                && e.len() <= 5
+                && e.chars().all(|c| c.is_ascii_alphanumeric());
+            if valid { Some(e) } else { None }
+        })
+        .unwrap_or_else(|| "mp3".to_string());
 
     // Remove any existing custom file for this slot (preserves zero orphans).
     if let Ok(entries) = std::fs::read_dir(&audio_dir) {

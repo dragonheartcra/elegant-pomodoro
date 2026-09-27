@@ -18,11 +18,7 @@
     "core:window:allow-set-fullscreen",
     "core:window:allow-is-fullscreen",
     "opener:default",
-    "dialog:default",
     "dialog:allow-open",
-    "notification:allow-is-permission-granted",
-    "notification:allow-request-permission",
-    "notification:allow-show",
     "notification:allow-notify"
   ]
 }
