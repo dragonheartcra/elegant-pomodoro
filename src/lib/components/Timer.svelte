@@ -71,7 +71,15 @@
             is_paused: false,
           }));
         }),
-        await onTimerStarted(() => {
+        await onTimerStarted(({ total_secs }) => {
+          // Update the store immediately — the first tick only arrives 1s
+          // later, and a stale "not running" state invites a stray Pause.
+          timerState.update((s) => ({
+            ...s,
+            total_secs,
+            is_running: true,
+            is_paused: false,
+          }));
           music.onTimerStarted();
           ambient.play();
         }),

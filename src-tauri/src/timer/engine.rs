@@ -150,7 +150,11 @@ fn run_loop(
 
             // -----------------------------------------------------------------
             Phase::Paused | Phase::Suspended => match cmd_rx.recv() {
-                Ok(TimerCommand::Resume | TimerCommand::WakeResume) => {
+                // Start while paused is treated as Resume: the frontend's
+                // toggle() sends Start whenever elapsed_secs == 0 (e.g. pause
+                // right after start), and a silently ignored Start would
+                // leave the engine paused with no way out but Reset.
+                Ok(TimerCommand::Resume | TimerCommand::WakeResume | TimerCommand::Start) => {
                     let _ = event_tx.send(TimerEvent::Resumed { elapsed_secs });
                     Transition::To(Phase::Running(RunningSegment {
                         start: Instant::now(),
@@ -344,6 +348,29 @@ mod tests {
                 last_elapsed = *elapsed_secs;
             }
         }
+    }
+
+    /// Regression: pause before the first tick (elapsed == 0), then Start.
+    /// The engine used to silently ignore Start in the Paused phase, leaving
+    /// the timer stuck until Reset.
+    #[test]
+    fn start_while_paused_at_zero_resumes() {
+        let (handle, rx) = spawn(5, TICK);
+        handle.send(TimerCommand::Start);
+        // Pause immediately (FIFO guarantees Start is processed first).
+        handle.send(TimerCommand::Pause);
+        std::thread::sleep(TICK);
+        handle.send(TimerCommand::Start); // must be treated as Resume
+
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        assert!(
+            events.iter().any(|e| matches!(e, TimerEvent::Resumed { .. })),
+            "Start while paused must resume"
+        );
+        assert!(
+            events.iter().any(|e| matches!(e, TimerEvent::Complete { .. })),
+            "timer must complete after the resumed start"
+        );
     }
 
     #[test]

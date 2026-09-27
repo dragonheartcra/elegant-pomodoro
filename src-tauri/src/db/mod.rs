@@ -11,9 +11,39 @@ pub type DbState = Arc<Mutex<Connection>>;
 /// Open (or create) the `pomotroid.db` file inside `app_data_dir`,
 /// enable WAL mode for better concurrent read performance,
 /// and run any pending schema migrations.
+///
+/// If the database is corrupt/unreadable, it is quarantined as
+/// `pomotroid.db.corrupt-<timestamp>` (along with its WAL/SHM sidecars) and
+/// opened fresh, so a broken file never prevents the app from launching.
 pub fn open(app_data_dir: &std::path::Path) -> Result<DbState> {
     let db_path = app_data_dir.join("pomotroid.db");
-    let conn = Connection::open(&db_path)?;
+    match try_open(&db_path) {
+        Ok(state) => Ok(state),
+        Err(first_err) => {
+            log::warn!("[db] open failed ({first_err}); quarantining database and retrying");
+            let ts = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0);
+            for suffix in ["", "-wal", "-shm"] {
+                let src = app_data_dir.join(format!("pomotroid.db{suffix}"));
+                if src.exists() {
+                    let dst = app_data_dir.join(format!("pomotroid.db.corrupt-{ts}{suffix}"));
+                    if let Err(e) = std::fs::rename(&src, &dst) {
+                        log::error!("[db] failed to quarantine {}: {e}", src.display());
+                    }
+                }
+            }
+            try_open(&db_path).map_err(|second_err| {
+                log::error!("[db] retry after quarantine failed: {second_err}");
+                second_err
+            })
+        }
+    }
+}
+
+fn try_open(db_path: &std::path::Path) -> Result<DbState> {
+    let conn = Connection::open(db_path)?;
 
     // WAL mode: readers don't block writers and vice-versa.
     conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")?;

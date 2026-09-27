@@ -166,14 +166,20 @@ impl TimerController {
     }
 
     /// Update the duration for the current round when settings change.
-    /// Only takes effect after the next Start/Resume (current countdown is not interrupted).
+    /// Only takes effect after the next Start/Resume (current countdown is not
+    /// interrupted beyond the clamp below).
+    ///
+    /// Sends `Prime` instead of `Reconfigure`: Reconfigure transitions a
+    /// running/paused engine to Idle *without any event*, which would freeze
+    /// the timer; Prime updates the stored duration in-place (clamped) and
+    /// never changes the phase, closing the settings-vs-auto-start race.
     pub fn reconfigure(&self) {
         let duration = {
             let seq = self.sequence.lock().unwrap();
             let settings = self.settings.lock().unwrap();
             seq.current_duration_secs(&settings)
         };
-        self.engine.send(TimerCommand::Reconfigure { duration_secs: duration });
+        self.engine.send(TimerCommand::Prime { duration_secs: duration });
     }
 
     // --- Query ---

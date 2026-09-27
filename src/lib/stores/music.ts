@@ -130,6 +130,12 @@ async function play(): Promise<boolean> {
   applyVolume();
   try {
     await getAudio().play();
+    // A pause() that raced ahead resolves our pending play() without actually
+    // playing — trust the element state, not the promise result.
+    if (getAudio().paused) {
+      publish({ isPlaying: false });
+      return false;
+    }
     publish({ isPlaying: true });
     return true;
   } catch (e) {
@@ -300,35 +306,39 @@ export const music = {
 export async function initMusicRemote(): Promise<UnlistenFn> {
   return await listen<{ type: string; payload?: unknown }>('music:command', (event) => {
     const cmd = event.payload;
-    switch (cmd?.type) {
-      case 'getState':
-        // Music window just opened — give it the current snapshot.
-        void emit('music:state', get(musicState));
-        break;
-      case 'preview': {
-        // User clicked a channel in the panel — play exactly that one.
-        const slug = String(cmd.payload ?? '');
-        if (!slug) break;
-        if (slug !== get(musicState).activeChannelSlug) loadChannel(slug);
-        void play();
-        break;
+    void (async () => {
+      switch (cmd?.type) {
+        case 'getState':
+          // Music window just opened — give it the current snapshot.
+          void emit('music:state', get(musicState));
+          break;
+        case 'preview': {
+          // User clicked a channel in the panel — play exactly that one.
+          const slug = String(cmd.payload ?? '');
+          if (!slug) break;
+          if (!get(musicState).ready) await music.init(); // retry data load
+          if (slug !== get(musicState).activeChannelSlug) loadChannel(slug);
+          void play();
+          break;
+        }
+        case 'play':
+          if (!get(musicState).ready) await music.init(); // retry data load
+          ensurePlaying();
+          ambient.play();
+          break;
+        case 'pause':
+          pause();
+          ambient.pause();
+          break;
+        case 'next':
+          // Keep the current playing/paused state across the track change.
+          nextTrack(get(musicState).isPlaying);
+          break;
+        case 'prev':
+          prevTrack(get(musicState).isPlaying);
+          break;
       }
-      case 'play':
-        if (!get(musicState).ready) break;
-        ensurePlaying();
-        ambient.play();
-        break;
-      case 'pause':
-        pause();
-        ambient.pause();
-        break;
-      case 'next':
-        nextTrack(false);
-        break;
-      case 'prev':
-        prevTrack(false);
-        break;
-    }
+    })();
   });
 }
 

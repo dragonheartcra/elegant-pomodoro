@@ -105,7 +105,10 @@
         await info(`[main] initialized, theme=${active?.name ?? 'none'}`);
       } catch (e) {
         await logError(`[main] initialization failed: ${e}`);
-        throw e;
+        // Never leave the process running with an invisible window — show the
+        // UI even in a degraded state (default theme/locale) so the user can
+        // still quit or see that something went wrong.
+        await getCurrentWebviewWindow().show().catch(() => {});
       }
 
       // Live OS color scheme changes — re-resolve only in auto mode.

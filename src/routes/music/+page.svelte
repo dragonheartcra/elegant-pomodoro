@@ -329,7 +329,15 @@
             class:selected={currentChannelSlug === c.slug}
             onclick={() => pickChannel(c.slug)}
           >
-            <img class="ch-cover" src={c.cover} alt="" loading="lazy" />
+            <img
+              class="ch-cover"
+              src={c.cover}
+              alt=""
+              loading="lazy"
+              onerror={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/app-icon.png';
+              }}
+            />
             <span class="ch-text">
               <span class="ch-title">{c.title}</span>
               <span class="ch-sub">{c.subtitle}</span>
