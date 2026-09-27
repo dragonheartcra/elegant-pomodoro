@@ -10,3 +10,9 @@ thumbs.db
 *.cert
 .svelte-kit/
 build/
+src/paraglide/
+src-tauri/target/
+src-tauri/gen/schemas/
+*.db
+*.db-shm
+*.db-wal

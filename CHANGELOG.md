@@ -1,3 +1,28 @@
+# Changelog
+
+## [v0.1.2] - 2026-09-28
+
+- Fixed: settings changes no longer stop music/ambient (settings_set emits `timer:snapshot`; `timer:reset` reserved for genuine resets)
+- Fixed: channel catalog nesting — every channel previously resolved to an empty playlist (silent music)
+- Fixed: music window failed to create (WebView2 browser-args environment conflict)
+- Changed: clicking a channel in the music panel plays it immediately; on_break toggle no longer hijacks work-round playback
+- Added: startup race hardening (pendingStart replay, resume self-heal, remote listener ordering), audio error give-up recovery, parallel ambient starts, debounced volume sliders
+- Changed: tray tooltip / notification app-name / startup banner renamed; accessibility notice rebranded in 8 languages; missing i18n keys added for de/es/fr/ja/pt/tr
+- Tests: timer-engine tests use event-driven waiting (stable under load)
+
+## [v0.1.1] - 2026-09-28
+
+- Fixed: FlowTunes data load reliability and logging for the music engine
+- Changed: tray icon enabled by default (progress-circle icon)
+- Fixed: renamed startup banner to Elegant Pomodoro
+
+## [v0.1.0] - 2026-09-28
+
+- Initial fork of Pomotroid 1.7.1 renamed to Elegant Pomodoro; upstream updater removed
+- Added FlowTunes music channels (41 channels / 6,792 streamed tracks) with work/break channel binding
+- Added ambient sound mixing (65 loops, per-loop volume) synced to the timer
+- Added music panel window with FlowTunes-style picker
+
 ## [v1.7.1] - 2026-05-11
 
 ### Bug Fixes

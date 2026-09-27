@@ -82,6 +82,8 @@
     const key = tab === 'focus' ? 'music_channel_work' : 'music_channel_break';
     const updated = await setSetting(key, slug);
     settings.set(updated);
+    // Clicking a channel plays it right away (FlowTunes-style), explicitly.
+    await emitMusicCommand('preview', slug);
   }
 
   async function setMusicVolume(v: number) {
@@ -89,11 +91,16 @@
     settings.set(updated);
   }
 
-  // Slider drags fire oninput per tick — debounce the IPC round-trips.
+  // Slider drags fire oninput per tick — debounce the IPC round-trips, and
+  // commit immediately on release (onchange) so the final value always lands.
   let volumeTimer: ReturnType<typeof setTimeout> | undefined;
   function onMusicVolumeInput(v: number) {
     clearTimeout(volumeTimer);
     volumeTimer = setTimeout(() => setMusicVolume(v), 120);
+  }
+  function onMusicVolumeChange(v: number) {
+    clearTimeout(volumeTimer);
+    void setMusicVolume(v);
   }
 
   const loopVolumeTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -106,6 +113,11 @@
         void setLoopVolume(id, v);
       }, 120)
     );
+  }
+  function onLoopVolumeChange(id: string, v: number) {
+    clearTimeout(loopVolumeTimers.get(id));
+    loopVolumeTimers.delete(id);
+    void setLoopVolume(id, v);
   }
 
   async function setMusicOnBreak(v: boolean) {
@@ -283,6 +295,7 @@
           step="0.01"
           value={$settings.music_volume}
           oninput={(e) => onMusicVolumeInput(Number(e.currentTarget.value))}
+          onchange={(e) => onMusicVolumeChange(Number(e.currentTarget.value))}
           aria-label={m.music_volume()}
         />
       </div>
@@ -383,6 +396,7 @@
                         step="0.01"
                         value={loopVolumes[id] ?? 0.375}
                         oninput={(e) => onLoopVolumeInput(id, Number(e.currentTarget.value))}
+                        onchange={(e) => onLoopVolumeChange(id, Number(e.currentTarget.value))}
                         aria-label={soundTitle(id)}
                       />
                     {/if}

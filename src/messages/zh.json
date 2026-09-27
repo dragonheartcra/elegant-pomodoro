@@ -73,7 +73,7 @@
   "system_group_updates": "更新",
   "system_toggle_check_updates": "自动检查更新",
   "system_toggle_check_updates_desc": "打开设置时自动检查新版本。",
-  "shortcuts_accessibility_notice": "在 macOS 上使用全局快捷键需要辅助功能权限。请在系统设置 → 隐私与安全性 → 辅助功能中启用 Pomotroid。",
+  "shortcuts_accessibility_notice": "在 macOS 上使用全局快捷键需要辅助功能权限。请在系统设置 → 隐私与安全性 → 辅助功能中启用 Elegant Pomodoro。",
   "shortcuts_accessibility_open": "打开系统设置",
   "shortcuts_note": "全局快捷键即使窗口未聚焦也能使用。点击字段并按下所需的按键组合进行录制。",
   "shortcuts_toggle_timer": "切换计时器",

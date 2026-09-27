@@ -46,7 +46,9 @@ let soundCategoriesCache: FlowSoundCategory[] | null = null;
 /** Track ids for a channel UUID, in playlist order. */
 export function tracksForChannel(channelId: string): string[] {
   return catalogCache?.tracks?.[channelId] ?? [];
-}export function channelBySlug(slug: string): FlowChannel | undefined {
+}
+
+export function channelBySlug(slug: string): FlowChannel | undefined {
   return channelsCache?.find((c) => c.slug === slug);
 }
 

@@ -28,7 +28,7 @@ npm run check
 npm run paraglide:compile
 ```
 
-There are no automated tests in this codebase.
+Rust unit tests live beside the code (`cargo test`); the timer-engine tests use event-driven waiting (`wait_for_ticks`) instead of fixed sleeps.
 
 ## Architecture
 
@@ -37,6 +37,7 @@ There are no automated tests in this codebase.
 - **`main`** (`src/routes/+page.svelte`) — the timer window
 - **`settings`** (`src/routes/settings/+page.svelte`) — opened via `new WebviewWindow('settings', ...)` from `Titlebar.svelte`
 - **`stats`** (`src/routes/stats/+page.svelte`) — statistics window
+- **`music`** (`src/routes/music/+page.svelte`) — music panel window (music/ambient engines live in `main`; this window is a remote control via `music:command` events)
 
 ### IPC layer
 
@@ -50,7 +51,8 @@ Rust commands live in `src-tauri/src/commands.rs`. All commands return `Result<T
 - `timer:paused` — `{ elapsed_secs }`
 - `timer:resumed` — `{ elapsed_secs }`
 - `timer:round-change` — full `TimerSnapshot`
-- `timer:reset` — full `TimerSnapshot` (used to sync frontend after settings changes)
+- `timer:snapshot` — full `TimerSnapshot` (settings-driven sync; does NOT stop the music engines)
+- `timer:reset` — full `TimerSnapshot` (genuine reset; frontend stops music/ambient here)
 - `settings:changed` — full `Settings` object
 - `themes:changed` — `Theme[]`
 - `sessions:cleared`

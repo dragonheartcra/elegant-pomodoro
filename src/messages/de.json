@@ -73,7 +73,7 @@
   "system_group_updates": "Updates",
   "system_toggle_check_updates": "Automatisch nach Updates suchen",
   "system_toggle_check_updates_desc": "Beim Öffnen der Einstellungen automatisch auf neue Versionen prüfen.",
-  "shortcuts_accessibility_notice": "Globale Tastenkürzel erfordern unter macOS Zugriff auf die Bedienungshilfen. Aktiviere Pomotroid unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen.",
+  "shortcuts_accessibility_notice": "Globale Tastenkürzel erfordern unter macOS Zugriff auf die Bedienungshilfen. Aktiviere Elegant Pomodoro unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen.",
   "shortcuts_accessibility_open": "Systemeinstellungen öffnen",
   "shortcuts_note": "Globale Tastenkürzel funktionieren auch, wenn das Fenster nicht fokussiert ist. Klicke auf ein Feld und drücke die gewünschte Tastenkombination, um sie aufzuzeichnen.",
   "shortcuts_toggle_timer": "Timer umschalten",

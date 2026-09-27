@@ -119,7 +119,7 @@
         }),
         await onTimerReset((snap) => {
           timerState.set(snap);
-          music.onTimerReset();
+          music.onTimerReset(snap);
           ambient.stop();
         }),
         await onTimerSnapshot((snap) => {

@@ -3,12 +3,14 @@
 // remote control via `music:command` events; state is broadcast on `music:state`.
 //
 // Playback rules:
-//   - Picking a channel (work or break) in the music panel plays it right away,
-//     FlowTunes-style — no need to start the timer first.
-//   - Timer events still drive it: started/resumed → play the round's channel,
-//     round-change → switch to the new round's channel, paused → pause,
-//     reset → stop.
-//   - The panel's play/pause button controls music+ambient only (not the timer).
+//   - Clicking a channel in the panel plays it right away (explicit preview
+//     command) — timer or not, FlowTunes-style.
+//   - The music_on_break toggle has NO immediate effect on playback; it only
+//     changes what plays when the next break round starts (applied immediately
+//     if we are already inside a break).
+//   - Timer events govern round transitions: started/resumed → play the
+//     round's channel, round-change → switch channel, paused → pause,
+//     reset → stop + resync round type.
 
 import { get, writable } from 'svelte/store';
 import { emit, listen } from '@tauri-apps/api/event';
@@ -23,7 +25,8 @@ import {
 } from '$lib/flowtunes/data';
 import { settings } from '$lib/stores/settings';
 import { ambient } from '$lib/stores/ambient';
-import type { RoundType } from '$lib/types';
+import { getSettings } from '$lib/ipc';
+import type { RoundType, TimerState } from '$lib/types';
 
 export interface MusicState {
   /** Round the engine last saw ('work' initially). */
@@ -52,7 +55,7 @@ let audio: HTMLAudioElement | null = null;
 let tracks: string[] = [];
 let initialized = false;
 let lastAppliedVolume = -1;
-/** Consecutive 'error'-event skips; reset on successful playback. */
+/** Consecutive 'error'-event skips; reset on successful playback or stop(). */
 let consecutiveErrors = 0;
 /** timer:started/resumed arrived before FlowTunes data finished loading. */
 let pendingStart = false;
@@ -70,7 +73,7 @@ function getAudio(): HTMLAudioElement {
     audio = new Audio();
     audio.addEventListener('ended', () => {
       consecutiveErrors = 0;
-      nextTrack();
+      nextTrack(true);
     });
     audio.addEventListener('error', () => {
       // Bad/missing track or network hiccup: skip forward so playback never
@@ -78,7 +81,7 @@ function getAudio(): HTMLAudioElement {
       // stop() clears the error state so the next start/resume reloads fresh.
       consecutiveErrors += 1;
       void logError(`[music] track load failed (${consecutiveErrors} consecutive): ${audio?.src}`);
-      if (consecutiveErrors <= 3) nextTrack();
+      if (consecutiveErrors <= 3) nextTrack(true);
       else stop();
     });
     audio.addEventListener('playing', () => {
@@ -149,27 +152,30 @@ function stop() {
     audio.load();
   }
   tracks = [];
+  consecutiveErrors = 0;
   publish({ activeChannelSlug: '', trackIndex: 0, trackTotal: 0, isPlaying: false });
 }
 
-function nextTrack() {
+/** Switch playlist tracks. Autoplay for ended/error chains and explicit
+ *  user clicks; false for remote next/prev while paused (keep paused). */
+function nextTrack(autoplay: boolean) {
   if (tracks.length === 0) return;
   const { trackIndex } = get(musicState);
   const next = (trackIndex + 1) % tracks.length;
   getAudio().src = trackUrl(tracks[next]);
   getAudio().load();
   publish({ trackIndex: next });
-  void play();
+  if (autoplay) void play();
 }
 
-function prevTrack() {
+function prevTrack(autoplay: boolean) {
   if (tracks.length === 0) return;
   const { trackIndex } = get(musicState);
   const prev = (trackIndex - 1 + tracks.length) % tracks.length;
   getAudio().src = trackUrl(tracks[prev]);
   getAudio().load();
   publish({ trackIndex: prev });
-  void play();
+  if (autoplay) void play();
 }
 
 // ---------------------------------------------------------------------------
@@ -193,6 +199,13 @@ export const music = {
   async init() {
     if (initialized) return;
     initialized = true;
+    // Hydrate settings first so the subscription's "previous values" snapshot
+    // reflects the database, not compile-time defaults.
+    try {
+      settings.set(await getSettings());
+    } catch {
+      // Keep compile-time defaults; hydration via settings:changed may follow.
+    }
     try {
       await loadFlowData();
       publish({ ready: true });
@@ -203,35 +216,23 @@ export const music = {
       return;
     }
 
-    // Live-apply music settings (also fires on startup with loaded values).
-    let prevWork = get(settings).music_channel_work;
-    let prevBreak = get(settings).music_channel_break;
+    // The music_on_break toggle applies immediately only while INSIDE a break
+    // round; channel picks never auto-play from here — the panel sends an
+    // explicit `preview` command when the user clicks a channel.
     let prevOnBreak = get(settings).music_on_break;
     settings.subscribe((s) => {
       applyVolume();
-      const changedWork = s.music_channel_work !== prevWork;
-      const changedBreak = s.music_channel_break !== prevBreak;
       const changedOnBreak = s.music_on_break !== prevOnBreak;
-      if (!changedWork && !changedBreak && !changedOnBreak) return;
-      prevWork = s.music_channel_work;
-      prevBreak = s.music_channel_break;
+      if (!changedOnBreak) return;
       prevOnBreak = s.music_on_break;
-
-      // The panel edits the channel for the tab the user is looking at —
-      // play exactly what they picked, regardless of the active round.
-      let wanted: string;
-      if (changedWork) {
-        wanted = s.music_channel_work;
-      } else {
-        wanted = s.music_on_break ? s.music_channel_break : '';
-      }
+      const roundType = get(musicState).roundType;
+      if (roundType === 'work') return; // toggle only governs break rounds
+      const wanted = s.music_on_break ? s.music_channel_break : '';
       if (!wanted) {
         stop();
         return;
       }
-      if (wanted !== get(musicState).activeChannelSlug) {
-        loadChannel(wanted);
-      }
+      if (wanted !== get(musicState).activeChannelSlug) loadChannel(wanted);
       void play();
     });
 
@@ -252,8 +253,8 @@ export const music = {
   },
 
   /** Timer entered the next round — switch channel and keep playing so the
-   *  soundscape carries over (round-change is followed by auto-start's
-   *  started event, which re-asserts playback anyway). */
+   *  soundscape carries over (auto-start's started event re-asserts playback
+   *  right after). */
   onRoundChange(roundType: RoundType) {
     publish({ roundType });
     const wanted = channelForRound(roundType);
@@ -278,28 +279,43 @@ export const music = {
   },
 
   onTimerPaused() {
+    pendingStart = false;
     pause();
   },
 
-  onTimerReset() {
+  onTimerReset(snap: TimerState) {
+    pendingStart = false;
     stop();
+    // Reset rewinds the sequence to Work — resync so the next start picks the
+    // right channel.
+    publish({ roundType: snap.round_type });
   },
 };
 
 // ---------------------------------------------------------------------------
-// Remote control (music window): transport commands for music+ambient only.
-// State is broadcast from publish() on 'music:state'.
+// Remote control (music window): explicit preview + transport commands for
+// music+ambient. State is broadcast from publish() on 'music:state'.
 // ---------------------------------------------------------------------------
 
 export async function initMusicRemote(): Promise<UnlistenFn> {
-  return await listen<{ type: string }>('music:command', (event) => {
-    switch (event.payload?.type) {
+  return await listen<{ type: string; payload?: unknown }>('music:command', (event) => {
+    const cmd = event.payload;
+    switch (cmd?.type) {
       case 'getState':
         // Music window just opened — give it the current snapshot.
         void emit('music:state', get(musicState));
         break;
-      case 'play':
+      case 'preview': {
+        // User clicked a channel in the panel — play exactly that one.
+        const slug = String(cmd.payload ?? '');
+        if (!slug) break;
+        if (slug !== get(musicState).activeChannelSlug) loadChannel(slug);
         void play();
+        break;
+      }
+      case 'play':
+        if (!get(musicState).ready) break;
+        ensurePlaying();
         ambient.play();
         break;
       case 'pause':
@@ -307,15 +323,15 @@ export async function initMusicRemote(): Promise<UnlistenFn> {
         ambient.pause();
         break;
       case 'next':
-        nextTrack();
+        nextTrack(false);
         break;
       case 'prev':
-        prevTrack();
+        prevTrack(false);
         break;
     }
   });
 }
 
-export async function emitMusicCommand(type: string) {
-  await emit('music:command', { type });
+export async function emitMusicCommand(type: string, payload?: unknown) {
+  await emit('music:command', { type, payload });
 }

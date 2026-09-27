@@ -206,7 +206,7 @@ Pushing the tag triggers the [release workflow](.github/workflows/release.yml), 
 
 - Builds Linux (`.deb`, `.AppImage`), macOS (universal `.dmg`), and Windows (`.exe` installer) in parallel
 - Creates a **draft** GitHub Release with all artifacts attached and the changelog section as the release body
-- Commits `latest.json` (auto-updater manifest) and `pomotroid.json` (Scoop manifest) to `main`
+- (Upstream note) Upstream also committed `latest.json`/`pomotroid.json`; this fork removed the updater, so those artifacts no longer apply
 
 **4. Publish the draft**
 
