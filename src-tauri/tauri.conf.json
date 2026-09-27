@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Elegant Pomodoro",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "com.elegant.pomodoro",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -22,8 +22,7 @@
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
         "backgroundColor": "#2F384B",
-        "visible": false,
-        "additionalBrowserArgs": "--autoplay-policy=no-user-gesture-required"
+        "visible": false
       }
     ],
     "security": {

@@ -118,10 +118,9 @@ pub fn settings_set(
 
     // Broadcast an updated snapshot so the frontend immediately reflects any
     // changed settings (round count, durations, etc.) regardless of timer
-    // state.  The timer:reset handler only calls timerState.set(), so emitting
-    // while running does not interrupt the countdown; the next timer:tick
-    // event will reconcile total_secs from the engine within one second.
-    app.emit("timer:reset", &timer.get_snapshot()).ok();
+    // Emit a snapshot-only event: the frontend must NOT treat settings changes
+    // as a timer reset (the music/ambient engines stop on timer:reset).
+    app.emit("timer:snapshot", &timer.get_snapshot()).ok();
 
     // Propagate volume and tick-sound changes to the audio engine (optional state).
     if let Some(audio) = app.try_state::<Arc<AudioManager>>() {

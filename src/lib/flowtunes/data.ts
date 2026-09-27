@@ -39,16 +39,14 @@ export function loopIconUrl(loopId: string): string {
 }
 
 let channelsCache: FlowChannel[] | null = null;
-let catalogCache: Record<string, string[]> | null = null;
+let catalogCache: { tracks: Record<string, string[]> } | null = null;
 let soundsCache: FlowSound[] | null = null;
 let soundCategoriesCache: FlowSoundCategory[] | null = null;
 
 /** Track ids for a channel UUID, in playlist order. */
 export function tracksForChannel(channelId: string): string[] {
-  return catalogCache?.[channelId] ?? [];
-}
-
-export function channelBySlug(slug: string): FlowChannel | undefined {
+  return catalogCache?.tracks?.[channelId] ?? [];
+}export function channelBySlug(slug: string): FlowChannel | undefined {
   return channelsCache?.find((c) => c.slug === slug);
 }
 
@@ -78,7 +76,7 @@ export async function loadFlowData(): Promise<void> {
     throw new Error('Failed to load FlowTunes data');
   }
   channelsCache = (await channelsRes.json()) as FlowChannel[];
-  catalogCache = (await catalogRes.json()) as Record<string, string[]>;
+  catalogCache = (await catalogRes.json()) as { tracks: Record<string, string[]> };
   const ambient = (await ambientRes.json()) as {
     sounds: FlowSound[];
     categories: FlowSoundCategory[];

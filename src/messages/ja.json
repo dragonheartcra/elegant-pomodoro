@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "有効にすると、進捗アークがゼロに向かってカウントダウンします（塗りつぶしではなく）。",
   "tooltip_auto_start_work": "休憩終了後に次の作業ラウンドを自動的に開始する。",
   "tooltip_auto_start_break": "作業ラウンド終了後に休憩を自動的に開始する。",
-  "tooltip_websocket": "ストリームオーバーレイなどの外部統合用のローカルWebSocketサーバーを有効にします。デフォルトでは無効です。"
+  "tooltip_websocket": "ストリームオーバーレイなどの外部統合用のローカルWebSocketサーバーを有効にします。デフォルトでは無効です。",
+  "tooltip_music": "音楽パネルを開く",
+  "music_title": "音楽",
+  "music_now_playing": "再生中",
+  "music_idle_hint": "音楽はタイマーと一緒に再生・停止します。",
+  "music_track_of": "{total} 曲中 {n} 曲目",
+  "music_volume": "音楽の音量",
+  "music_tab_focus": "集中",
+  "music_tab_break": "休憩",
+  "music_on_break_toggle": "休憩中も音楽を再生",
+  "music_on_break_toggle_desc": "休憩が始まると休憩チャンネルに切り替えます。オフにすると休憩中は無音になります。",
+  "music_load_error": "音楽ライブラリの読み込みに失敗しました。",
+  "ambient_title": "環境音",
+  "ambient_add": "サウンドを追加",
+  "ambient_hide": "隠す",
+  "ambient_clear_all": "すべて解除",
+  "ambient_none_selected": "環境音が未選択です — 雨、焚き火、鳥のさえずりなどを音楽にミックスできます。"
 }

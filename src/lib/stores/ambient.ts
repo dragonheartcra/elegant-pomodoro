@@ -8,6 +8,7 @@
 // paused, full stop on reset (wired in Timer.svelte).
 
 import { get } from 'svelte/store';
+import { error as logError } from '@tauri-apps/plugin-log';
 import { loopUrl } from '$lib/flowtunes/data';
 import { settings } from '$lib/stores/settings';
 
@@ -52,6 +53,9 @@ function sync() {
       const el = new Audio(loopUrl(id));
       el.loop = true;
       el.volume = volumeOf(id);
+      el.addEventListener('error', () => {
+        void logError(`[ambient] loop failed to load: ${id}`);
+      });
       instances.set(id, el);
     }
   }
@@ -64,13 +68,10 @@ function sync() {
 
 async function playAll() {
   shouldPlay = true;
-  for (const el of instances.values()) {
-    try {
-      await el.play();
-    } catch {
-      // autoplay rejection or network error — leave paused, retried on next event
-    }
-  }
+  // Start all loops in parallel — a slow network loop must not delay the rest.
+  await Promise.allSettled(
+    [...instances.values()].map((el) => el.play().catch(() => {}))
+  );
 }
 
 function pauseAll() {

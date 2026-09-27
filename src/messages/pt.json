@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "Quando ativado, o arco de progresso faz contagem regressiva até zero em vez de se preencher.",
   "tooltip_auto_start_work": "Iniciar automaticamente a próxima rodada de trabalho quando uma pausa terminar.",
   "tooltip_auto_start_break": "Iniciar automaticamente a pausa quando uma rodada de trabalho terminar.",
-  "tooltip_websocket": "Ativa um servidor WebSocket local para integrações externas como overlays de streaming. Desativado por padrão."
+  "tooltip_websocket": "Ativa um servidor WebSocket local para integrações externas como overlays de streaming. Desativado por padrão.",
+  "tooltip_music": "Abrir o painel de música",
+  "music_title": "Música",
+  "music_now_playing": "Tocando agora",
+  "music_idle_hint": "A música começa e para junto com o cronômetro.",
+  "music_track_of": "Faixa {n} de {total}",
+  "music_volume": "Volume da música",
+  "music_tab_focus": "Foco",
+  "music_tab_break": "Pausa",
+  "music_on_break_toggle": "Tocar música nas pausas",
+  "music_on_break_toggle_desc": "Muda para o canal de pausa quando a pausa começar. Desative para pausas em silêncio.",
+  "music_load_error": "Falha ao carregar a biblioteca de música.",
+  "ambient_title": "Sons ambientes",
+  "ambient_add": "Adicionar sons",
+  "ambient_hide": "Ocultar",
+  "ambient_clear_all": "Limpar tudo",
+  "ambient_none_selected": "Nenhum som ambiente selecionado — misture chuva, fogueira, pássaros e mais na sua música."
 }

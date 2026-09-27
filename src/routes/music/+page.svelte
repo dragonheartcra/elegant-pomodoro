@@ -89,6 +89,25 @@
     settings.set(updated);
   }
 
+  // Slider drags fire oninput per tick — debounce the IPC round-trips.
+  let volumeTimer: ReturnType<typeof setTimeout> | undefined;
+  function onMusicVolumeInput(v: number) {
+    clearTimeout(volumeTimer);
+    volumeTimer = setTimeout(() => setMusicVolume(v), 120);
+  }
+
+  const loopVolumeTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  function onLoopVolumeInput(id: string, v: number) {
+    clearTimeout(loopVolumeTimers.get(id));
+    loopVolumeTimers.set(
+      id,
+      setTimeout(() => {
+        loopVolumeTimers.delete(id);
+        void setLoopVolume(id, v);
+      }, 120)
+    );
+  }
+
   async function setMusicOnBreak(v: boolean) {
     const updated = await setSetting('music_on_break', String(v));
     settings.set(updated);
@@ -153,6 +172,10 @@
           if (current) applyTheme(current);
         })
       );
+
+      // Ask the main window for the current playback snapshot (it only
+      // broadcasts on changes, which may never have happened).
+      await emitMusicCommand('getState');
 
       // Live OS color scheme changes — re-resolve only in auto mode.
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -259,7 +282,7 @@
           max="1"
           step="0.01"
           value={$settings.music_volume}
-          oninput={(e) => setMusicVolume(Number(e.currentTarget.value))}
+          oninput={(e) => onMusicVolumeInput(Number(e.currentTarget.value))}
           aria-label={m.music_volume()}
         />
       </div>
@@ -359,7 +382,7 @@
                         max="1"
                         step="0.01"
                         value={loopVolumes[id] ?? 0.375}
-                        oninput={(e) => setLoopVolume(id, Number(e.currentTarget.value))}
+                        oninput={(e) => onLoopVolumeInput(id, Number(e.currentTarget.value))}
                         aria-label={soundTitle(id)}
                       />
                     {/if}

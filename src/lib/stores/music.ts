@@ -12,6 +12,7 @@
 
 import { get, writable } from 'svelte/store';
 import { emit, listen } from '@tauri-apps/api/event';
+import type { UnlistenFn } from '@tauri-apps/api/event';
 import { error as logError, info as logInfo } from '@tauri-apps/plugin-log';
 import {
   channelBySlug,
@@ -53,6 +54,8 @@ let initialized = false;
 let lastAppliedVolume = -1;
 /** Consecutive 'error'-event skips; reset on successful playback. */
 let consecutiveErrors = 0;
+/** timer:started/resumed arrived before FlowTunes data finished loading. */
+let pendingStart = false;
 
 function publish(patch: Partial<MusicState>) {
   musicState.update((s) => {
@@ -71,11 +74,12 @@ function getAudio(): HTMLAudioElement {
     });
     audio.addEventListener('error', () => {
       // Bad/missing track or network hiccup: skip forward so playback never
-      // stalls, but bail out after a few consecutive failures (offline).
+      // stalls, but bail out after a few consecutive failures (offline) —
+      // stop() clears the error state so the next start/resume reloads fresh.
       consecutiveErrors += 1;
       void logError(`[music] track load failed (${consecutiveErrors} consecutive): ${audio?.src}`);
       if (consecutiveErrors <= 3) nextTrack();
-      else publish({ isPlaying: false });
+      else stop();
     });
     audio.addEventListener('playing', () => {
       consecutiveErrors = 0;
@@ -112,7 +116,6 @@ function loadChannel(slug: string, startIndex = 0): boolean {
     stop();
     return false;
   }
-  tracks = [...tracks].sort(() => Math.random() - 0.5); // shuffle for variety
   getAudio().src = trackUrl(tracks[startIndex]);
   getAudio().load();
   publish({ activeChannelSlug: slug, trackIndex: startIndex, trackTotal: tracks.length });
@@ -173,6 +176,18 @@ function prevTrack() {
 // Timer-facing API (called from Timer.svelte event handlers, main window only)
 // ---------------------------------------------------------------------------
 
+/** A timer:started / timer:resumed arrived — make sure the current round's
+ *  channel is loaded and playing (self-heals any silent stop). */
+function ensurePlaying() {
+  const wanted = channelForRound(get(musicState).roundType);
+  if (!wanted) {
+    stop();
+    return;
+  }
+  if (wanted !== get(musicState).activeChannelSlug) loadChannel(wanted);
+  void play();
+}
+
 export const music = {
   /** Load bundled data once and wire the settings subscription. */
   async init() {
@@ -194,17 +209,22 @@ export const music = {
     let prevOnBreak = get(settings).music_on_break;
     settings.subscribe((s) => {
       applyVolume();
-      const channelChanged =
-        s.music_channel_work !== prevWork ||
-        s.music_channel_break !== prevBreak ||
-        s.music_on_break !== prevOnBreak;
-      if (!channelChanged) return;
+      const changedWork = s.music_channel_work !== prevWork;
+      const changedBreak = s.music_channel_break !== prevBreak;
+      const changedOnBreak = s.music_on_break !== prevOnBreak;
+      if (!changedWork && !changedBreak && !changedOnBreak) return;
       prevWork = s.music_channel_work;
       prevBreak = s.music_channel_break;
       prevOnBreak = s.music_on_break;
 
-      // Picking a channel plays it right away — timer or not.
-      const wanted = channelForRound(get(musicState).roundType);
+      // The panel edits the channel for the tab the user is looking at —
+      // play exactly what they picked, regardless of the active round.
+      let wanted: string;
+      if (changedWork) {
+        wanted = s.music_channel_work;
+      } else {
+        wanted = s.music_on_break ? s.music_channel_break : '';
+      }
       if (!wanted) {
         stop();
         return;
@@ -214,17 +234,21 @@ export const music = {
       }
       void play();
     });
+
+    // A timer start raced ahead of data loading — replay it now.
+    if (pendingStart) {
+      pendingStart = false;
+      ensurePlaying();
+    }
   },
 
   /** A round actually began (user pressed play or auto-start). */
   onTimerStarted() {
-    const wanted = channelForRound(get(musicState).roundType);
-    if (!wanted) {
-      stop();
+    if (!get(musicState).ready) {
+      pendingStart = true;
       return;
     }
-    if (wanted !== get(musicState).activeChannelSlug) loadChannel(wanted);
-    void play();
+    ensurePlaying();
   },
 
   /** Timer entered the next round — switch channel and keep playing so the
@@ -244,7 +268,13 @@ export const music = {
   },
 
   onTimerResumed() {
-    void play();
+    if (!get(musicState).ready) {
+      pendingStart = true;
+      return;
+    }
+    // Self-healing: if anything stopped/cleared the engine mid-round, resume
+    // reloads the current round's channel instead of playing nothing.
+    ensurePlaying();
   },
 
   onTimerPaused() {
@@ -261,9 +291,13 @@ export const music = {
 // State is broadcast from publish() on 'music:state'.
 // ---------------------------------------------------------------------------
 
-export async function initMusicRemote() {
-  await listen<{ type: string }>('music:command', (event) => {
+export async function initMusicRemote(): Promise<UnlistenFn> {
+  return await listen<{ type: string }>('music:command', (event) => {
     switch (event.payload?.type) {
+      case 'getState':
+        // Music window just opened — give it the current snapshot.
+        void emit('music:state', get(musicState));
+        break;
       case 'play':
         void play();
         ambient.play();

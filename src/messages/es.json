@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "Cuando está activado, el arco de progreso cuenta regresivamente hasta cero en lugar de llenarse.",
   "tooltip_auto_start_work": "Iniciar automáticamente la siguiente ronda de trabajo cuando termina un descanso.",
   "tooltip_auto_start_break": "Iniciar automáticamente el descanso cuando termina una ronda de trabajo.",
-  "tooltip_websocket": "Activa un servidor WebSocket local para integraciones externas como overlays de streaming. Desactivado por defecto."
+  "tooltip_websocket": "Activa un servidor WebSocket local para integraciones externas como overlays de streaming. Desactivado por defecto.",
+  "tooltip_music": "Abrir el panel de música",
+  "music_title": "Música",
+  "music_now_playing": "Reproduciendo",
+  "music_idle_hint": "La música empieza y se detiene con el temporizador.",
+  "music_track_of": "Pista {n} de {total}",
+  "music_volume": "Volumen de la música",
+  "music_tab_focus": "Enfoque",
+  "music_tab_break": "Descanso",
+  "music_on_break_toggle": "Reproducir música en los descansos",
+  "music_on_break_toggle_desc": "Cambia al canal de descanso al empezar un descanso. Desactívalo para descansos en silencio.",
+  "music_load_error": "No se pudo cargar la biblioteca de música.",
+  "ambient_title": "Sonidos ambientales",
+  "ambient_add": "Añadir sonidos",
+  "ambient_hide": "Ocultar",
+  "ambient_clear_all": "Quitar todos",
+  "ambient_none_selected": "Aún no hay sonidos ambientales: mezcla lluvia, fuego, pájaros y más con tu música."
 }

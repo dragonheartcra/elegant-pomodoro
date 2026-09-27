@@ -13,6 +13,7 @@
     onTimerResumed,
     onRoundChange,
     onTimerReset,
+    onTimerSnapshot,
   } from '$lib/ipc';
   import { timerState } from '$lib/stores/timer';
   import { settings } from '$lib/stores/settings';
@@ -120,15 +121,22 @@
           timerState.set(snap);
           music.onTimerReset();
           ambient.stop();
+        }),
+        await onTimerSnapshot((snap) => {
+          // Settings-driven sync only — must not stop music/ambient.
+          timerState.set(snap);
         })
       );
 
       // Music + ambient engines (this component only runs in the main window).
-      // Failures here must never affect the timer itself.
+      // Failures here must never affect the timer itself. The remote listener
+      // is registered before the engines so early getState requests from the
+      // music window are answered.
       try {
+        const unlistenRemote = await initMusicRemote();
+        cleanups.push(unlistenRemote);
         await music.init();
         ambient.init();
-        await initMusicRemote();
       } catch (e) {
         await logError(`[music] engine initialization failed: ${e}`);
       }

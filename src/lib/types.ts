@@ -66,6 +66,11 @@ export interface Settings {
   ambient_selected: string;
   /** JSON object string mapping loop id → volume (0–1). */
   ambient_volumes: string;
+  /** Last known main-window geometry (physical px; null = OS default). */
+  window_x: number | null;
+  window_y: number | null;
+  window_width: number | null;
+  window_height: number | null;
 }
 
 

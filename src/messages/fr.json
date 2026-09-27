@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "Lorsqu'activé, l'arc de progression compte à rebours vers zéro au lieu de se remplir.",
   "tooltip_auto_start_work": "Démarrer automatiquement la prochaine session de travail lorsqu'une pause se termine.",
   "tooltip_auto_start_break": "Démarrer automatiquement la pause lorsqu'une session de travail se termine.",
-  "tooltip_websocket": "Active un serveur WebSocket local pour les intégrations externes telles que les overlays de streaming. Désactivé par défaut."
+  "tooltip_websocket": "Active un serveur WebSocket local pour les intégrations externes telles que les overlays de streaming. Désactivé par défaut.",
+  "tooltip_music": "Ouvrir le panneau musical",
+  "music_title": "Musique",
+  "music_now_playing": "Lecture en cours",
+  "music_idle_hint": "La musique démarre et s'arrête avec le minuteur.",
+  "music_track_of": "Piste {n} sur {total}",
+  "music_volume": "Volume de la musique",
+  "music_tab_focus": "Concentration",
+  "music_tab_break": "Pause",
+  "music_on_break_toggle": "Musique pendant les pauses",
+  "music_on_break_toggle_desc": "Passe sur la chaîne de pause au début d'une pause. Désactivez pour des pauses silencieuses.",
+  "music_load_error": "Échec du chargement de la bibliothèque musicale.",
+  "ambient_title": "Sons d'ambiance",
+  "ambient_add": "Ajouter des sons",
+  "ambient_hide": "Masquer",
+  "ambient_clear_all": "Tout retirer",
+  "ambient_none_selected": "Aucun son d'ambiance sélectionné — mélangez pluie, feu, chants d'oiseaux et plus à votre musique."
 }

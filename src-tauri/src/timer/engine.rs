@@ -294,6 +294,25 @@ mod tests {
         events
     }
 
+    /// Block until `n` ticks have been observed (elapsed_secs >= n), returning
+    /// the highest elapsed_secs seen. Event-driven replacement for fixed
+    /// sleeps, which race under CI/machine load.
+    fn wait_for_ticks(rx: &Receiver<TimerEvent>, n: u32, timeout: Duration) -> u32 {
+        let deadline = Instant::now() + timeout;
+        let mut max_elapsed = 0;
+        while max_elapsed < n && Instant::now() < deadline {
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            match rx.recv_timeout(remaining) {
+                Ok(TimerEvent::Tick { elapsed_secs, .. }) => {
+                    max_elapsed = max_elapsed.max(elapsed_secs);
+                }
+                Ok(_) => {}
+                Err(_) => break,
+            }
+        }
+        max_elapsed
+    }
+
     #[test]
     fn fires_correct_number_of_ticks_and_completes() {
         let (handle, rx) = spawn(5, TICK);
@@ -413,8 +432,8 @@ mod tests {
         let (handle, rx) = spawn(10, TICK);
         handle.send(TimerCommand::Start);
 
-        // Let 3 ticks fire, then suspend.
-        std::thread::sleep(TICK * 3 + TICK / 2);
+        // Block until 3 ticks have fired, then suspend.
+        let observed = wait_for_ticks(&rx, 3, Duration::from_secs(2));
         handle.send(TimerCommand::Suspend);
 
         let before = drain(&rx);
@@ -430,7 +449,10 @@ mod tests {
             "expected Suspended event with elapsed_secs"
         );
         let saved = suspended_elapsed.unwrap();
-        assert!(saved >= 3, "elapsed at suspend should be >= 3 s, got {saved}");
+        assert!(
+            saved >= observed && observed >= 3,
+            "elapsed at suspend should be >= 3 s, got {saved} (observed {observed})"
+        );
 
         // Gap: simulate OS sleep (no ticks must fire).
         std::thread::sleep(TICK * 5);
@@ -536,8 +558,8 @@ mod tests {
         // should run at least one more tick first.
         let (handle, rx) = spawn(10, TICK);
         handle.send(TimerCommand::Start);
-        // Let 5 ticks fire so elapsed_secs = 5.
-        std::thread::sleep(TICK * 5 + TICK / 2);
+        // Block until 5 ticks fire so elapsed_secs = 5.
+        let elapsed_at_prime = wait_for_ticks(&rx, 5, Duration::from_secs(2));
         // Prime with duration below elapsed — without the clamp this would fire
         // Complete on the very next tick.
         handle.send(TimerCommand::Prime { duration_secs: 2 });
@@ -545,7 +567,7 @@ mod tests {
         let events = collect_until_complete(&rx, Duration::from_secs(2));
         let ticks_after_prime: Vec<_> = events
             .iter()
-            .filter(|e| matches!(e, TimerEvent::Tick { elapsed_secs, .. } if *elapsed_secs > 5))
+            .filter(|e| matches!(e, TimerEvent::Tick { elapsed_secs, .. } if *elapsed_secs > elapsed_at_prime))
             .collect();
         assert!(
             !ticks_after_prime.is_empty(),
@@ -563,8 +585,8 @@ mod tests {
         // must not cause immediate completion on the first tick after Resume.
         let (handle, rx) = spawn(10, TICK);
         handle.send(TimerCommand::Start);
-        // Let 5 ticks fire, then pause.
-        std::thread::sleep(TICK * 5 + TICK / 2);
+        // Block until 5 ticks fire, then pause.
+        let elapsed_at_prime = wait_for_ticks(&rx, 5, Duration::from_secs(2));
         handle.send(TimerCommand::Pause);
         std::thread::sleep(TICK); // let Paused event arrive
         drain(&rx);
@@ -576,7 +598,7 @@ mod tests {
         let events = collect_until_complete(&rx, Duration::from_secs(2));
         let ticks_after_resume: Vec<_> = events
             .iter()
-            .filter(|e| matches!(e, TimerEvent::Tick { elapsed_secs, .. } if *elapsed_secs > 5))
+            .filter(|e| matches!(e, TimerEvent::Tick { elapsed_secs, .. } if *elapsed_secs > elapsed_at_prime))
             .collect();
         assert!(
             !ticks_after_resume.is_empty(),

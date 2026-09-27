@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "Wenn aktiviert, zählt der Fortschrittsbogen auf null herunter, anstatt sich zu füllen.",
   "tooltip_auto_start_work": "Die nächste Arbeitsrunde automatisch starten, wenn eine Pause endet.",
   "tooltip_auto_start_break": "Die Pause automatisch starten, wenn eine Arbeitsrunde endet.",
-  "tooltip_websocket": "Aktiviert einen lokalen WebSocket-Server für externe Integrationen wie Stream-Overlays. Standardmäßig deaktiviert."
+  "tooltip_websocket": "Aktiviert einen lokalen WebSocket-Server für externe Integrationen wie Stream-Overlays. Standardmäßig deaktiviert.",
+  "tooltip_music": "Musikpanel öffnen",
+  "music_title": "Musik",
+  "music_now_playing": "Jetzt läuft",
+  "music_idle_hint": "Musik startet und stoppt mit dem Timer.",
+  "music_track_of": "Titel {n} von {total}",
+  "music_volume": "Musiklautstärke",
+  "music_tab_focus": "Fokus",
+  "music_tab_break": "Pause",
+  "music_on_break_toggle": "Musik in Pausen abspielen",
+  "music_on_break_toggle_desc": "Beim Pausenbeginn zum Pausenkanal wechseln. Ausschalten für stille Pausen.",
+  "music_load_error": "Musikbibliothek konnte nicht geladen werden.",
+  "ambient_title": "Ambientklänge",
+  "ambient_add": "Klänge hinzufügen",
+  "ambient_hide": "Ausblenden",
+  "ambient_clear_all": "Alle entfernen",
+  "ambient_none_selected": "Noch keine Ambientklänge ausgewählt — mische Regen, Feuer, Vogelgezwitscher und mehr zu deiner Musik."
 }

@@ -332,7 +332,7 @@ pub fn run() {
                             let _ = win_for_close.hide();
                         } else {
                             // Main window is truly closing — close child windows if open.
-                            for label in ["settings", "stats"] {
+                            for label in ["settings", "stats", "music"] {
                                 if let Some(win) = app_for_close.get_webview_window(label) {
                                     let _ = win.close();
                                 }

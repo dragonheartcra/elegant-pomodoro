@@ -121,6 +121,10 @@ export const onRoundChange = (cb: (state: TimerState) => void): Promise<Unlisten
 export const onTimerReset = (cb: (state: TimerState) => void): Promise<UnlistenFn> =>
   listen<TimerState>('timer:reset', (e) => cb(e.payload));
 
+/** Snapshot-only sync (e.g. after settings changes) — NOT a timer reset. */
+export const onTimerSnapshot = (cb: (state: TimerState) => void): Promise<UnlistenFn> =>
+  listen<TimerState>('timer:snapshot', (e) => cb(e.payload));
+
 export const onSettingsChanged = (cb: (settings: Settings) => void): Promise<UnlistenFn> =>
   listen<Settings>('settings:changed', (e) => cb(e.payload));
 

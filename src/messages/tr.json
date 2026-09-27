@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "Etkinleştirildiğinde, ilerleme yayı dolmak yerine sıfıra doğru geri sayar.",
   "tooltip_auto_start_work": "Bir mola bittiğinde sonraki çalışma turunu otomatik olarak başlat.",
   "tooltip_auto_start_break": "Bir çalışma turu tamamlandığında molayı otomatik olarak başlat.",
-  "tooltip_websocket": "Yayın yerleşimleri gibi harici entegrasyonlar için yerel bir WebSocket sunucusu etkinleştirir. Varsayılan olarak devre dışıdır."
+  "tooltip_websocket": "Yayın yerleşimleri gibi harici entegrasyonlar için yerel bir WebSocket sunucusu etkinleştirir. Varsayılan olarak devre dışıdır.",
+  "tooltip_music": "Müzik panelini aç",
+  "music_title": "Müzik",
+  "music_now_playing": "Şimdi çalıyor",
+  "music_idle_hint": "Müzik, zamanlayıcıyla birlikte başlar ve durur.",
+  "music_track_of": "Parça {n} / {total}",
+  "music_volume": "Müzik sesi",
+  "music_tab_focus": "Odaklanma",
+  "music_tab_break": "Mola",
+  "music_on_break_toggle": "Molalarda müzik çal",
+  "music_on_break_toggle_desc": "Mola başladığında mola kanalına geçer. Sessiz molalar için kapatın.",
+  "music_load_error": "Müzik kitaplığı yüklenemedi.",
+  "ambient_title": "Ortam sesleri",
+  "ambient_add": "Ses ekle",
+  "ambient_hide": "Gizle",
+  "ambient_clear_all": "Tümünü kaldır",
+  "ambient_none_selected": "Henüz ortam sesi seçilmedi — yağmur, ateş, kuş sesleri ve daha fazlasını müziğe karıştırın."
 }
