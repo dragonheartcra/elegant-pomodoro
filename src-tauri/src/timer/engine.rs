@@ -351,8 +351,8 @@ mod tests {
         let (handle, rx) = spawn(6, TICK);
         handle.send(TimerCommand::Start);
 
-        // Let 2 ticks fire, then pause.
-        std::thread::sleep(TICK * 2 + TICK / 2);
+        // Block until 2 ticks fire, then pause.
+        let observed = wait_for_ticks(&rx, 2, Duration::from_secs(2));
         handle.send(TimerCommand::Pause);
 
         // Collect events so far.
@@ -363,12 +363,10 @@ mod tests {
             .iter()
             .filter(|e| matches!(e, TimerEvent::Paused { .. }))
             .count();
-        let ticks_before_pause = events_before_resume
-            .iter()
-            .filter(|e| matches!(e, TimerEvent::Tick { .. }))
-            .count();
         assert_eq!(paused, 1, "expected 1 Paused event");
-        assert!(ticks_before_pause >= 2, "should have at least 2 ticks before pause");
+        // wait_for_ticks observed the 2 pre-pause ticks directly (it consumed
+        // them from the channel, so they must not be re-counted here).
+        assert!(observed >= 2, "should have at least 2 ticks before pause");
 
         // Resume and let the rest complete.
         handle.send(TimerCommand::Resume);

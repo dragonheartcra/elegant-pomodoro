@@ -70,7 +70,11 @@ async function playAll() {
   shouldPlay = true;
   // Start all loops in parallel — a slow network loop must not delay the rest.
   await Promise.allSettled(
-    [...instances.values()].map((el) => el.play().catch(() => {}))
+    [...instances.entries()].map(([id, el]) =>
+      el.play().catch((e) => {
+        void logError(`[ambient] play() rejected for ${id}: ${e}`);
+      })
+    )
   );
 }
 
