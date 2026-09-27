@@ -25,6 +25,7 @@
   import MiniControls from './MiniControls.svelte';
   import Tooltip from './Tooltip.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
+  import { error as logError } from '@tauri-apps/plugin-log';
   import * as m from '$paraglide/messages.js';
   import { notificationShow } from '$lib/ipc';
 
@@ -57,11 +58,8 @@
       const initial = await getTimerState();
       timerState.set(initial);
 
-      // Music + ambient engines (this component only runs in the main window).
-      await music.init();
-      ambient.init();
-      await initMusicRemote();
-
+      // Timer listeners come FIRST so the dial can never be blocked by the
+      // music engine's own initialization.
       cleanups.push(
         await onTimerTick(({ elapsed_secs, total_secs }) => {
           timerState.update((s) => ({
@@ -124,6 +122,16 @@
           ambient.stop();
         })
       );
+
+      // Music + ambient engines (this component only runs in the main window).
+      // Failures here must never affect the timer itself.
+      try {
+        await music.init();
+        ambient.init();
+        await initMusicRemote();
+      } catch (e) {
+        await logError(`[music] engine initialization failed: ${e}`);
+      }
     })();
 
     return () => {

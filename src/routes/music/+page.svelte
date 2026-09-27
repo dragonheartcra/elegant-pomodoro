@@ -6,7 +6,7 @@
   import { onMount } from 'svelte';
   import { listen } from '@tauri-apps/api/event';
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-  import { getSettings, getThemes, onSettingsChanged, onThemesChanged, setSetting, timerToggle } from '$lib/ipc';
+  import { getSettings, getThemes, onSettingsChanged, onThemesChanged, setSetting } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
   import { resolveThemeName } from '$lib/utils/theme';
@@ -215,7 +215,11 @@
               <path d="M13.5 3.6v8.8a.6.6 0 0 1-.94.5L6.2 8.5a.62.62 0 0 1 0-1L12.56 3.1a.6.6 0 0 1 .94.5Z" />
             </svg>
           </button>
-          <button class="t-btn t-play" onclick={() => timerToggle()} aria-label="Play / pause">
+          <button
+            class="t-btn t-play"
+            onclick={() => emitMusicCommand(np.isPlaying ? 'pause' : 'play')}
+            aria-label="Play / pause"
+          >
             {#if np.isPlaying}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                 <rect x="3.5" y="2.5" width="3.4" height="11" rx="0.8" />

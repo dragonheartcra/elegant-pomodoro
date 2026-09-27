@@ -2,16 +2,17 @@
 // playback survives closing the music window). The music window acts as a
 // remote control via `music:command` events; state is broadcast on `music:state`.
 //
-// Playback is driven strictly by timer events (wired in Timer.svelte):
-//   timer:started / timer:resumed → play the current round's channel
-//   timer:round-change            → switch to the new round's channel (paused)
-//   timer:paused                  → pause
-//   timer:reset                   → stop
-// Settings changes (channel pick, volume, music_on_break) are applied live via
-// the settings store subscription.
+// Playback rules:
+//   - Picking a channel (work or break) in the music panel plays it right away,
+//     FlowTunes-style — no need to start the timer first.
+//   - Timer events still drive it: started/resumed → play the round's channel,
+//     round-change → switch to the new round's channel, paused → pause,
+//     reset → stop.
+//   - The panel's play/pause button controls music+ambient only (not the timer).
 
 import { get, writable } from 'svelte/store';
 import { emit, listen } from '@tauri-apps/api/event';
+import { error as logError, info as logInfo } from '@tauri-apps/plugin-log';
 import {
   channelBySlug,
   loadFlowData,
@@ -20,6 +21,7 @@ import {
   type FlowChannel,
 } from '$lib/flowtunes/data';
 import { settings } from '$lib/stores/settings';
+import { ambient } from '$lib/stores/ambient';
 import type { RoundType } from '$lib/types';
 
 export interface MusicState {
@@ -49,6 +51,8 @@ let audio: HTMLAudioElement | null = null;
 let tracks: string[] = [];
 let initialized = false;
 let lastAppliedVolume = -1;
+/** Consecutive 'error'-event skips; reset on successful playback. */
+let consecutiveErrors = 0;
 
 function publish(patch: Partial<MusicState>) {
   musicState.update((s) => {
@@ -61,8 +65,21 @@ function publish(patch: Partial<MusicState>) {
 function getAudio(): HTMLAudioElement {
   if (!audio) {
     audio = new Audio();
-    audio.addEventListener('ended', () => nextTrack());
-    audio.addEventListener('error', () => nextTrack()); // skip bad/missing track
+    audio.addEventListener('ended', () => {
+      consecutiveErrors = 0;
+      nextTrack();
+    });
+    audio.addEventListener('error', () => {
+      // Bad/missing track or network hiccup: skip forward so playback never
+      // stalls, but bail out after a few consecutive failures (offline).
+      consecutiveErrors += 1;
+      void logError(`[music] track load failed (${consecutiveErrors} consecutive): ${audio?.src}`);
+      if (consecutiveErrors <= 3) nextTrack();
+      else publish({ isPlaying: false });
+    });
+    audio.addEventListener('playing', () => {
+      consecutiveErrors = 0;
+    });
   }
   return audio;
 }
@@ -82,26 +99,37 @@ function channelForRound(roundType: RoundType): string {
 }
 
 /** Load a channel's playlist and the given track index. */
-function loadChannel(slug: string) {
+function loadChannel(slug: string, startIndex = 0): boolean {
   const channel: FlowChannel | undefined = channelBySlug(slug);
-  if (!channel || tracksForChannel(channel.id).length === 0) {
+  if (!channel) {
+    void logError(`[music] unknown channel slug: ${slug}`);
     stop();
-    return;
+    return false;
   }
   tracks = tracksForChannel(channel.id);
-  getAudio().src = trackUrl(tracks[0]);
+  if (tracks.length === 0) {
+    void logError(`[music] empty catalog for channel: ${slug}`);
+    stop();
+    return false;
+  }
+  tracks = [...tracks].sort(() => Math.random() - 0.5); // shuffle for variety
+  getAudio().src = trackUrl(tracks[startIndex]);
   getAudio().load();
-  publish({ activeChannelSlug: slug, trackIndex: 0, trackTotal: tracks.length });
+  publish({ activeChannelSlug: slug, trackIndex: startIndex, trackTotal: tracks.length });
+  return true;
 }
 
-async function play() {
-  if (!get(musicState).activeChannelSlug) return;
+async function play(): Promise<boolean> {
+  if (!get(musicState).activeChannelSlug) return false;
   applyVolume();
   try {
     await getAudio().play();
     publish({ isPlaying: true });
-  } catch {
+    return true;
+  } catch (e) {
+    void logError(`[music] play() rejected: ${e}`);
     publish({ isPlaying: false });
+    return false;
   }
 }
 
@@ -128,7 +156,7 @@ function nextTrack() {
   getAudio().src = trackUrl(tracks[next]);
   getAudio().load();
   publish({ trackIndex: next });
-  if (get(musicState).isPlaying) void play();
+  void play();
 }
 
 function prevTrack() {
@@ -138,7 +166,7 @@ function prevTrack() {
   getAudio().src = trackUrl(tracks[prev]);
   getAudio().load();
   publish({ trackIndex: prev });
-  if (get(musicState).isPlaying) void play();
+  void play();
 }
 
 // ---------------------------------------------------------------------------
@@ -153,8 +181,9 @@ export const music = {
     try {
       await loadFlowData();
       publish({ ready: true });
+      void logInfo('[music] FlowTunes data loaded');
     } catch (e) {
-      console.error('FlowTunes data failed to load', e);
+      void logError(`[music] FlowTunes data failed to load: ${e}`);
       initialized = false;
       return;
     }
@@ -165,26 +194,25 @@ export const music = {
     let prevOnBreak = get(settings).music_on_break;
     settings.subscribe((s) => {
       applyVolume();
-      const roundType = get(musicState).roundType;
-      const wanted = channelForRound(roundType);
       const channelChanged =
         s.music_channel_work !== prevWork ||
         s.music_channel_break !== prevBreak ||
         s.music_on_break !== prevOnBreak;
-      if (channelChanged) {
-        prevWork = s.music_channel_work;
-        prevBreak = s.music_channel_break;
-        prevOnBreak = s.music_on_break;
-        const { activeChannelSlug, isPlaying } = get(musicState);
-        if (wanted !== activeChannelSlug) {
-          if (!wanted) {
-            stop();
-          } else {
-            loadChannel(wanted);
-            if (isPlaying) void play();
-          }
-        }
+      if (!channelChanged) return;
+      prevWork = s.music_channel_work;
+      prevBreak = s.music_channel_break;
+      prevOnBreak = s.music_on_break;
+
+      // Picking a channel plays it right away — timer or not.
+      const wanted = channelForRound(get(musicState).roundType);
+      if (!wanted) {
+        stop();
+        return;
       }
+      if (wanted !== get(musicState).activeChannelSlug) {
+        loadChannel(wanted);
+      }
+      void play();
     });
   },
 
@@ -199,8 +227,9 @@ export const music = {
     void play();
   },
 
-  /** Timer entered the next round — switch channel but stay paused until
-   *  started/resumed (auto-start fires started immediately after). */
+  /** Timer entered the next round — switch channel and keep playing so the
+   *  soundscape carries over (round-change is followed by auto-start's
+   *  started event, which re-asserts playback anyway). */
   onRoundChange(roundType: RoundType) {
     publish({ roundType });
     const wanted = channelForRound(roundType);
@@ -210,6 +239,7 @@ export const music = {
     }
     if (wanted !== get(musicState).activeChannelSlug) {
       loadChannel(wanted);
+      if (get(musicState).isPlaying) void play();
     }
   },
 
@@ -227,14 +257,21 @@ export const music = {
 };
 
 // ---------------------------------------------------------------------------
-// Remote control (music window): next/prev only. Play/pause maps to the timer
-// (the music window invokes timerToggle directly); volume/channel go through
-// settings. State is broadcast from publish() on 'music:state'.
+// Remote control (music window): transport commands for music+ambient only.
+// State is broadcast from publish() on 'music:state'.
 // ---------------------------------------------------------------------------
 
 export async function initMusicRemote() {
   await listen<{ type: string }>('music:command', (event) => {
     switch (event.payload?.type) {
+      case 'play':
+        void play();
+        ambient.play();
+        break;
+      case 'pause':
+        pause();
+        ambient.pause();
+        break;
       case 'next':
         nextTrack();
         break;

@@ -69,7 +69,7 @@ pub fn run() {
                         env!("APP_BUILD_SHA")
                     );
                     log::info!(
-                        "Pomotroid v{} — data dir: {}",
+                        "Elegant Pomodoro v{} — data dir: {}",
                         env!("CARGO_PKG_VERSION"),
                         app_data_dir.display()
                     );
