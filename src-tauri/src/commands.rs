@@ -264,18 +264,18 @@ pub fn settings_reset_defaults(
     // Reconcile the tray with the restored defaults (tray_icon_enabled=true),
     // creating or destroying it as needed instead of always destroying.
     if new_settings.tray_icon_enabled || new_settings.min_to_tray {
-        if tray_state.icon.lock().unwrap().is_none() {
-            #[cfg(target_os = "linux")]
-            {
-                let app_handle = app.clone();
-                let ts = Arc::clone(&tray_state);
-                std::thread::spawn(move || {
-                    tray::create_tray(&app_handle, &ts);
-                });
-            }
-            #[cfg(not(target_os = "linux"))]
-            tray::create_tray(&app, &tray_state);
+        // create_tray re-shows an existing icon internally, so calling it
+        // unconditionally also restores a previously hidden tray.
+        #[cfg(target_os = "linux")]
+        {
+            let app_handle = app.clone();
+            let ts = Arc::clone(&tray_state);
+            std::thread::spawn(move || {
+                tray::create_tray(&app_handle, &ts);
+            });
         }
+        #[cfg(not(target_os = "linux"))]
+        tray::create_tray(&app, &tray_state);
     } else {
         tray::destroy_tray(&tray_state);
     }
