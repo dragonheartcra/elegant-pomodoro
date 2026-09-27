@@ -19,7 +19,7 @@ pub fn open(app_data_dir: &std::path::Path) -> Result<DbState> {
     let db_path = app_data_dir.join("pomotroid.db");
     match try_open(&db_path) {
         Ok(state) => Ok(state),
-        Err(first_err) => {
+        Err(first_err) if is_corruption(&first_err) => {
             log::warn!("[db] open failed ({first_err}); quarantining database and retrying");
             let ts = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -39,7 +39,22 @@ pub fn open(app_data_dir: &std::path::Path) -> Result<DbState> {
                 second_err
             })
         }
+        Err(other_err) => {
+            // Transient failures (file locked by AV/backup, I/O error) must NOT
+            // quarantine a healthy database — surface the error instead.
+            log::error!("[db] open failed for a non-corruption reason: {other_err}");
+            Err(other_err)
+        }
     }
+}
+
+/// True when the error indicates the database file itself is corrupt
+/// (as opposed to a transient I/O or locking failure).
+fn is_corruption(err: &rusqlite::Error) -> bool {
+    matches!(
+        err.sqlite_error_code(),
+        Some(rusqlite::ErrorCode::DatabaseCorrupt) | Some(rusqlite::ErrorCode::NotADatabase)
+    )
 }
 
 fn try_open(db_path: &std::path::Path) -> Result<DbState> {
