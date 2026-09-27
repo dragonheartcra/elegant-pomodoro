@@ -87,6 +87,29 @@
     });
   }
 
+  async function openMusic() {
+    const existing = await WebviewWindow.getByLabel('music');
+    if (existing) {
+      await existing.show();
+      await existing.setFocus();
+      return;
+    }
+    new WebviewWindow('music', {
+      url: '/music',
+      title: 'Elegant Pomodoro — Music',
+      width: 420,
+      height: 640,
+      minWidth: 340,
+      minHeight: 400,
+      decorations: isMac,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      titleBarStyle: isMac ? ('Overlay' as any) : undefined,
+      hiddenTitle: isMac ? true : undefined,
+      resizable: true,
+      visible: false,
+    });
+  }
+
   async function minimize() {
     suppressRestoredTitlebarState();
     if ($settings.min_to_tray) {
@@ -178,17 +201,37 @@
   </Tooltip>
 {/snippet}
 
+{#snippet musicBtn()}
+  <Tooltip text={m.tooltip_music()}>
+    <button class="btn-icon" onclick={openMusic} aria-label="Music">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path
+          d="M6 12.5V3.8a.6.6 0 0 1 .44-.58l5.2-1.44a.6.6 0 0 1 .76.58v8.34"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <circle cx="4" cy="12.5" r="2.1" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3" />
+        <circle cx="10.4" cy="10.7" r="2.1" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3" />
+      </svg>
+    </button>
+  </Tooltip>
+{/snippet}
+
 <nav class="titlebar" class:suppress-hover={suppressTitlebarHover} data-tauri-drag-region>
   <!-- Left: settings + stats buttons on Linux/Windows. On macOS the traffic
        lights live here; the action buttons move to the right side instead. -->
   {#if !isMac}
     {@render settingsBtn()}
     {@render statsBtn()}
+    {@render musicBtn()}
   {/if}
 
   <!-- Right: settings + stats buttons on macOS, window controls on Linux/Windows. -->
   <div class="controls">
     {#if isMac}
+      {@render musicBtn()}
       {@render statsBtn()}
       {@render settingsBtn()}
     {:else}

@@ -56,6 +56,16 @@ export interface Settings {
   local_shortcut_volume_up: string;
   local_shortcut_mute: string;
   local_shortcut_fullscreen: string;
+  /** FlowTunes channel slug played during work rounds. Empty = no music. */
+  music_channel_work: string;
+  /** FlowTunes channel slug played during breaks. Empty = no music. */
+  music_channel_break: string;
+  music_volume: number; // 0.0–1.0
+  music_on_break: boolean;
+  /** JSON array string of selected ambient loop ids. */
+  ambient_selected: string;
+  /** JSON object string mapping loop id → volume (0–1). */
+  ambient_volumes: string;
 }
 
 

@@ -8,6 +8,7 @@
     timerSkip,
     getTimerState,
     onTimerTick,
+    onTimerStarted,
     onTimerPaused,
     onTimerResumed,
     onRoundChange,
@@ -15,6 +16,8 @@
   } from '$lib/ipc';
   import { timerState } from '$lib/stores/timer';
   import { settings } from '$lib/stores/settings';
+  import { music, initMusicRemote } from '$lib/stores/music';
+  import { ambient } from '$lib/stores/ambient';
   import { fade } from 'svelte/transition';
   import TimerDial from './TimerDial.svelte';
   import TimerDisplay from './TimerDisplay.svelte';
@@ -54,6 +57,11 @@
       const initial = await getTimerState();
       timerState.set(initial);
 
+      // Music + ambient engines (this component only runs in the main window).
+      await music.init();
+      ambient.init();
+      await initMusicRemote();
+
       cleanups.push(
         await onTimerTick(({ elapsed_secs, total_secs }) => {
           timerState.update((s) => ({
@@ -64,6 +72,10 @@
             is_paused: false,
           }));
         }),
+        await onTimerStarted(() => {
+          music.onTimerStarted();
+          ambient.play();
+        }),
         await onTimerPaused(({ elapsed_secs }) => {
           timerState.update((s) => ({
             ...s,
@@ -71,6 +83,8 @@
             is_running: false,
             is_paused: true,
           }));
+          music.onTimerPaused();
+          ambient.pause();
         }),
         await onTimerResumed(({ elapsed_secs }) => {
           timerState.update((s) => ({
@@ -79,9 +93,12 @@
             is_running: true,
             is_paused: false,
           }));
+          music.onTimerResumed();
+          ambient.play();
         }),
         await onRoundChange((snap) => {
           timerState.set(snap);
+          music.onRoundChange(snap.round_type);
           if ($settings.notifications_enabled) {
             let title: string;
             let body: string;
@@ -103,6 +120,8 @@
         }),
         await onTimerReset((snap) => {
           timerState.set(snap);
+          music.onTimerReset();
+          ambient.stop();
         })
       );
     })();

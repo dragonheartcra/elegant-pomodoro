@@ -1,0 +1,480 @@
+{
+ "sounds": [
+  {
+   "id": "stream",
+   "title": "Stream",
+   "description": ""
+  },
+  {
+   "id": "river",
+   "title": "River",
+   "description": ""
+  },
+  {
+   "id": "stream-light-forest",
+   "title": "Forest Creek",
+   "description": ""
+  },
+  {
+   "id": "fountain",
+   "title": "Fountain",
+   "description": ""
+  },
+  {
+   "id": "waterfall",
+   "title": "Waterfall",
+   "description": ""
+  },
+  {
+   "id": "underwater-ambience",
+   "title": "Underwater",
+   "description": "Deep undersea bubbling"
+  },
+  {
+   "id": "water-bubbles",
+   "title": "Bubbles",
+   "description": "Light bubbling in water"
+  },
+  {
+   "id": "rain",
+   "title": "Spring Showers",
+   "description": ""
+  },
+  {
+   "id": "storm",
+   "title": "Rain on Roof",
+   "description": "Heavy rain fall under cover"
+  },
+  {
+   "id": "umbrella",
+   "title": "Umbrella Drops",
+   "description": "Rain drops on an umbrella"
+  },
+  {
+   "id": "rain-light-on-car",
+   "title": "Rain on Car",
+   "description": "Gentle rain on car roof"
+  },
+  {
+   "id": "rain-light-forest",
+   "title": "Forest Rain",
+   "description": "Rain fall through leaves"
+  },
+  {
+   "id": "wind",
+   "title": "Howling Wind",
+   "description": "Strong wind with whistling"
+  },
+  {
+   "id": "field",
+   "title": "Field Wind",
+   "description": "Wind blows through a field"
+  },
+  {
+   "id": "thunder",
+   "title": "Thunder",
+   "description": "Deep rolling thunderclaps"
+  },
+  {
+   "id": "binaural-delta",
+   "title": "Binaural Delta",
+   "description": "3.2 hz / Deep sleep"
+  },
+  {
+   "id": "binaural-theta",
+   "title": "Binaural Theta",
+   "description": "7.8 hz / Meditative relaxation"
+  },
+  {
+   "id": "binaural-alpha",
+   "title": "Binaural Alpha",
+   "description": "10.2 hz / Calm focus"
+  },
+  {
+   "id": "binaural-beta",
+   "title": "Binaural Beta",
+   "description": "19.7 hz / Alert concentration"
+  },
+  {
+   "id": "binaural-gamma",
+   "title": "Binaural Gamma",
+   "description": "40.1 hz / Mental boost"
+  },
+  {
+   "id": "isochronic-delta",
+   "title": "Isochronic Delta",
+   "description": "2.1 hz / Deep sleep"
+  },
+  {
+   "id": "isochronic-theta",
+   "title": "Isochronic Theta",
+   "description": "5.2 hz / Meditative relaxation"
+  },
+  {
+   "id": "isochronic-alpha",
+   "title": "Isochronic Alpha",
+   "description": "8.1 hz / Calm focus"
+  },
+  {
+   "id": "isochronic-beta",
+   "title": "Isochronic Beta",
+   "description": "13.7 hz / Alert concentration"
+  },
+  {
+   "id": "isochronic-gamma",
+   "title": "Isochronic Gamma",
+   "description": "30.1 hz / Mental boost"
+  },
+  {
+   "id": "noise-pink",
+   "title": "Pink Noise",
+   "description": "Balanced octaves"
+  },
+  {
+   "id": "noise-brown",
+   "title": "Brown Noise",
+   "description": "Deeper noise"
+  },
+  {
+   "id": "noise-white",
+   "title": "White Noise",
+   "description": "Balanced frequencies"
+  },
+  {
+   "id": "crickets",
+   "title": "Crickets",
+   "description": "Nighttime insect song"
+  },
+  {
+   "id": "pond",
+   "title": "Frogs",
+   "description": "Frog pond at night"
+  },
+  {
+   "id": "cat",
+   "title": "Purring",
+   "description": "Happy cat sounds"
+  },
+  {
+   "id": "horse",
+   "title": "Hoof Steps",
+   "description": "Horse on cobblestone"
+  },
+  {
+   "id": "bird",
+   "title": "Forest Birds",
+   "description": "Mix of forest bird songs"
+  },
+  {
+   "id": "birds-countryside",
+   "title": "Countryside Birds",
+   "description": "Gentle bird calls"
+  },
+  {
+   "id": "birds-songbirds",
+   "title": "Songbirds",
+   "description": "Melodic chirping"
+  },
+  {
+   "id": "birds-tropical",
+   "title": "Tropical Birds",
+   "description": "Exotic calls from the jungle"
+  },
+  {
+   "id": "birds-owl",
+   "title": "Owl Calls",
+   "description": "Nighttime owl hoots"
+  },
+  {
+   "id": "fire",
+   "title": "Blaze",
+   "description": "Crackling fire sound"
+  },
+  {
+   "id": "fire-campfire",
+   "title": "Campfire",
+   "description": "Large campfire outdoors"
+  },
+  {
+   "id": "fire-fireplace",
+   "title": "Fireplace",
+   "description": "Gentle indoor fireplace"
+  },
+  {
+   "id": "cafe",
+   "title": "Café Chatter",
+   "description": "Lively voices, cups"
+  },
+  {
+   "id": "cafe-new-orleans-french",
+   "title": "French Café",
+   "description": "Soft talk, gentle hum"
+  },
+  {
+   "id": "cafe-bolivia-university-library",
+   "title": "University Library",
+   "description": "Quiet study, whispers"
+  },
+  {
+   "id": "cafe-nyc-library",
+   "title": "NYC Library",
+   "description": "Muted voices, pages"
+  },
+  {
+   "id": "cafe-japan-restaurant",
+   "title": "Japanese Restaurant",
+   "description": "Subtle dining ambience"
+  },
+  {
+   "id": "cafe-tokyo-market",
+   "title": "Tokyo Market",
+   "description": "Bustling food stalls"
+  },
+  {
+   "id": "cafe-busy-cafe",
+   "title": "Busy Café",
+   "description": "Crowded café sounds"
+  },
+  {
+   "id": "old-town",
+   "title": "Old Town",
+   "description": "Footsteps, distant bells"
+  },
+  {
+   "id": "chimes-large-metal",
+   "title": "Deep Chimes",
+   "description": "Large metal tones"
+  },
+  {
+   "id": "chimes-bamboo",
+   "title": "Bamboo Chimes",
+   "description": "Soft wooden tones"
+  },
+  {
+   "id": "chimes-pentatonic",
+   "title": "Pentatonic Chimes",
+   "description": "Tuned five-note tones"
+  },
+  {
+   "id": "chimes-brass",
+   "title": "Brass Chimes",
+   "description": "Bright metal tones"
+  },
+  {
+   "id": "waves-4",
+   "title": "Gentle Waves",
+   "description": "Soft ripples ashore"
+  },
+  {
+   "id": "waves-2",
+   "title": "Shallow Waves",
+   "description": "Small rolling surf"
+  },
+  {
+   "id": "waves-1",
+   "title": "Medium Waves",
+   "description": "Steady ocean wash"
+  },
+  {
+   "id": "waves",
+   "title": "Crashing Waves",
+   "description": "Sharp coastal break"
+  },
+  {
+   "id": "waves-3",
+   "title": "Distant Waves",
+   "description": "Low offshore rumble"
+  },
+  {
+   "id": "waves-5",
+   "title": "Storm Waves",
+   "description": "Loud ocean roar"
+  },
+  {
+   "id": "fan",
+   "title": "Fan",
+   "description": "Droning desk fan"
+  },
+  {
+   "id": "vacuum",
+   "title": "Vacuum",
+   "description": "Household vacuum hum"
+  },
+  {
+   "id": "keyboard",
+   "title": "Typing",
+   "description": "Clacking keys"
+  },
+  {
+   "id": "train",
+   "title": "Train",
+   "description": "Rhythmic rail sounds"
+  },
+  {
+   "id": "om",
+   "title": "Meditative Hymn",
+   "description": "432 Hz binaural progression"
+  },
+  {
+   "id": "chalkboard-writing",
+   "title": "Chalkboard",
+   "description": "Chalk strokes on board"
+  },
+  {
+   "id": "lava-bubbles",
+   "title": "Lava",
+   "description": "Bubbling molten lava"
+  }
+ ],
+ "categories": [
+  {
+   "id": "water",
+   "title": "Water",
+   "description": "",
+   "loopIds": [
+    "stream",
+    "river",
+    "stream-light-forest",
+    "fountain",
+    "waterfall",
+    "underwater-ambience",
+    "water-bubbles"
+   ]
+  },
+  {
+   "id": "weather",
+   "title": "Weather",
+   "description": "",
+   "loopIds": [
+    "rain",
+    "storm",
+    "umbrella",
+    "rain-light-on-car",
+    "rain-light-forest",
+    "wind",
+    "field",
+    "thunder"
+   ]
+  },
+  {
+   "id": "binaural",
+   "title": "Binaural Beats",
+   "description": "Binaural beats are audio tones believed to influence brainwave activity by playing slightly different frequencies in each ear. Scientific research suggests effects on focus, relaxation, and sleep, but evidence varies.",
+   "loopIds": [
+    "binaural-delta",
+    "binaural-theta",
+    "binaural-alpha",
+    "binaural-beta",
+    "binaural-gamma"
+   ]
+  },
+  {
+   "id": "isochronic",
+   "title": "Isochronic Tones",
+   "description": "Isochronic tones are single tones that pulse on and off at specific frequencies, believed to support focus, relaxation, or sleep by entraining brainwave activity. Unlike binaural beats, isochronic tones don’t require headphones and use a consistent base frequency (we use 150 Hz).",
+   "loopIds": [
+    "isochronic-delta",
+    "isochronic-theta",
+    "isochronic-alpha",
+    "isochronic-beta",
+    "isochronic-gamma"
+   ]
+  },
+  {
+   "id": "noise",
+   "title": "Noise",
+   "description": "",
+   "loopIds": [
+    "noise-pink",
+    "noise-brown",
+    "noise-white"
+   ]
+  },
+  {
+   "id": "animals",
+   "title": "Animals",
+   "description": "",
+   "loopIds": [
+    "crickets",
+    "pond",
+    "cat",
+    "horse"
+   ]
+  },
+  {
+   "id": "birds",
+   "title": "Birds",
+   "description": "",
+   "loopIds": [
+    "bird",
+    "birds-countryside",
+    "birds-songbirds",
+    "birds-tropical",
+    "birds-owl"
+   ]
+  },
+  {
+   "id": "fire",
+   "title": "Fire",
+   "description": "",
+   "loopIds": [
+    "fire",
+    "fire-campfire",
+    "fire-fireplace"
+   ]
+  },
+  {
+   "id": "city",
+   "title": "City",
+   "description": "",
+   "loopIds": [
+    "cafe",
+    "cafe-new-orleans-french",
+    "cafe-bolivia-university-library",
+    "cafe-nyc-library",
+    "cafe-japan-restaurant",
+    "cafe-tokyo-market",
+    "cafe-busy-cafe",
+    "old-town"
+   ]
+  },
+  {
+   "id": "chimes",
+   "title": "Chimes",
+   "description": "",
+   "loopIds": [
+    "chimes-large-metal",
+    "chimes-bamboo",
+    "chimes-pentatonic",
+    "chimes-brass"
+   ]
+  },
+  {
+   "id": "waves",
+   "title": "Waves",
+   "description": "",
+   "loopIds": [
+    "waves-4",
+    "waves-2",
+    "waves-1",
+    "waves",
+    "waves-3",
+    "waves-5"
+   ]
+  },
+  {
+   "id": "other",
+   "title": "Other",
+   "description": "",
+   "loopIds": [
+    "fan",
+    "vacuum",
+    "keyboard",
+    "train",
+    "om",
+    "chalkboard-writing",
+    "lava-bubbles"
+   ]
+  }
+ ]
+}

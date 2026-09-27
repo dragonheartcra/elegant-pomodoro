@@ -43,6 +43,12 @@ const defaults: Settings = {
   local_shortcut_volume_up: 'ArrowUp',
   local_shortcut_mute: 'm',
   local_shortcut_fullscreen: 'F11',
+  music_channel_work: 'chill-lo-fi-beats',
+  music_channel_break: 'jazz-whispers',
+  music_volume: 0.75,
+  music_on_break: true,
+  ambient_selected: '[]',
+  ambient_volumes: '{}',
 };
 
 export const settings = writable<Settings>(defaults);

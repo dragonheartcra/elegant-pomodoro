@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "启用后，进度弧从满倒计时至零，而非从零填充。",
   "tooltip_auto_start_work": "休息结束后自动开始下一个工作轮次。",
   "tooltip_auto_start_break": "工作轮次结束后自动开始休息。",
-  "tooltip_websocket": "启用本地 WebSocket 服务器，用于直播覆盖层等外部集成。默认禁用。"
+    "tooltip_websocket": "启用本地 WebSocket 服务器，用于直播覆盖层等外部集成。默认禁用。",
+  "tooltip_music": "打开音乐面板",
+  "music_title": "音乐",
+  "music_now_playing": "正在播放",
+  "music_idle_hint": "音乐随计时器一起播放和暂停。",
+  "music_track_of": "第 {n} 首，共 {total} 首",
+  "music_volume": "音乐音量",
+  "music_tab_focus": "专注",
+  "music_tab_break": "休息",
+  "music_on_break_toggle": "休息时播放音乐",
+  "music_on_break_toggle_desc": "进入休息时自动切换到休息频道。关闭则休息时保持安静。",
+  "music_load_error": "音乐库加载失败。",
+  "ambient_title": "环境音",
+  "ambient_add": "添加环境音",
+  "ambient_hide": "收起",
+  "ambient_clear_all": "全部清除",
+  "ambient_none_selected": "还没有选择环境音——可以把雨声、篝火、鸟鸣等混进音乐里。"
 }

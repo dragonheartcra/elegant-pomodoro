@@ -65,6 +65,18 @@ pub struct Settings {
     pub window_width: Option<u32>,
     /// Last known window height (physical pixels). `None` = use OS default.
     pub window_height: Option<u32>,
+    /// FlowTunes channel slug played during work rounds. Empty = no music.
+    pub music_channel_work: String,
+    /// FlowTunes channel slug played during short/long breaks. Empty = no music.
+    pub music_channel_break: String,
+    /// Music volume in the 0.0–1.0 range (stored 0–100).
+    pub music_volume: f32,
+    /// Whether music keeps playing during breaks.
+    pub music_on_break: bool,
+    /// JSON array of selected ambient loop ids, e.g. `["rain","fire"]`.
+    pub ambient_selected: String,
+    /// JSON object of per-loop volumes, e.g. `{"rain":0.5}`.
+    pub ambient_volumes: String,
 }
 
 impl Default for Settings {
@@ -124,6 +136,12 @@ impl Default for Settings {
             window_y: None,
             window_width: None,
             window_height: None,
+            music_channel_work: "chill-lo-fi-beats".to_string(),
+            music_channel_break: "jazz-whispers".to_string(),
+            music_volume: 0.75,
+            music_on_break: true,
+            ambient_selected: "[]".to_string(),
+            ambient_volumes: "{}".to_string(),
         }
     }
 }
@@ -249,6 +267,27 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         window_y: parse_opt_i32(&map, "window_y"),
         window_width: parse_opt_u32(&map, "window_width"),
         window_height: parse_opt_u32(&map, "window_height"),
+        music_channel_work: map
+            .get("music_channel_work")
+            .cloned()
+            .unwrap_or(d.music_channel_work),
+        music_channel_break: map
+            .get("music_channel_break")
+            .cloned()
+            .unwrap_or(d.music_channel_break),
+        // DB stores 0–100; convert to 0.0–1.0.
+        music_volume: (parse_u32(&map, "music_volume", (d.music_volume * 100.0) as u32) as f32
+            / 100.0)
+            .clamp(0.0, 1.0),
+        music_on_break: parse_bool(&map, "music_on_break", d.music_on_break),
+        ambient_selected: map
+            .get("ambient_selected")
+            .cloned()
+            .unwrap_or(d.ambient_selected),
+        ambient_volumes: map
+            .get("ambient_volumes")
+            .cloned()
+            .unwrap_or(d.ambient_volumes),
     })
 }
 

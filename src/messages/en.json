@@ -149,5 +149,21 @@
   "tooltip_dial_countdown": "When enabled, the progress arc counts down to zero instead of filling up.",
   "tooltip_auto_start_work": "Automatically start the next work round when a break ends.",
   "tooltip_auto_start_break": "Automatically start the break when a work round completes.",
-  "tooltip_websocket": "Enables a local WebSocket server for external integrations such as stream overlays. Disabled by default."
+    "tooltip_websocket": "Enables a local WebSocket server for external integrations such as stream overlays. Disabled by default.",
+  "tooltip_music": "Open the music panel",
+  "music_title": "Music",
+  "music_now_playing": "Now playing",
+  "music_idle_hint": "Music starts and stops with the timer.",
+  "music_track_of": "Track {n} of {total}",
+  "music_volume": "Music volume",
+  "music_tab_focus": "Focus",
+  "music_tab_break": "Break",
+  "music_on_break_toggle": "Play music during breaks",
+  "music_on_break_toggle_desc": "Switch to the break channel when a break starts. Turn off for quiet breaks.",
+  "music_load_error": "Failed to load the music library.",
+  "ambient_title": "Ambient sounds",
+  "ambient_add": "Add sounds",
+  "ambient_hide": "Hide",
+  "ambient_clear_all": "Clear all",
+  "ambient_none_selected": "No ambient sounds selected yet — mix rain, fire, birdsong and more into your music."
 }

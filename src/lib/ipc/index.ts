@@ -98,6 +98,10 @@ export const traySupported = () => invoke<boolean>('tray_supported');
 
 // --- Event listeners ---
 
+export const onTimerStarted = (
+  cb: (payload: { total_secs: number }) => void
+): Promise<UnlistenFn> => listen<{ total_secs: number }>('timer:started', (e) => cb(e.payload));
+
 export const onTimerTick = (
   cb: (payload: { elapsed_secs: number; total_secs: number }) => void
 ): Promise<UnlistenFn> =>
