@@ -1,0 +1,6 @@
+node_modules/
+build/
+.svelte-kit/
+src/paraglide/
+src-tauri/
+CHANGELOG.md
