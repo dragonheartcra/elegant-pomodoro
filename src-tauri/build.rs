@@ -2,8 +2,8 @@ use std::process::Command;
 
 fn main() {
     // Rerun when git HEAD changes (new commit, checkout) or when tags move.
-    println!("cargo:rerun-if-changed=.git/HEAD");
-    println!("cargo:rerun-if-changed=.git/refs/");
+    println!("cargo:rerun-if-changed=../.git/HEAD");
+    println!("cargo:rerun-if-changed=../.git/refs/");
     // Rerun if the canonical version source changes.
     println!("cargo:rerun-if-changed=tauri.conf.json");
 

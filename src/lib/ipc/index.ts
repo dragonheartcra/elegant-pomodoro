@@ -131,5 +131,11 @@ export const onSettingsChanged = (cb: (settings: Settings) => void): Promise<Unl
 export const onThemesChanged = (cb: (themes: Theme[]) => void): Promise<UnlistenFn> =>
   listen<Theme[]>('themes:changed', (e) => cb(e.payload));
 
+/** Emitted when the optional WebSocket server fails to start (e.g. port in use). */
+export const onWebsocketError = (
+  cb: (payload: { message: string; port: number }) => void
+): Promise<UnlistenFn> =>
+  listen<{ message: string; port: number }>('websocket:error', (e) => cb(e.payload));
+
 export const onSessionsCleared = (cb: () => void): Promise<UnlistenFn> =>
   listen<void>('sessions:cleared', () => cb());

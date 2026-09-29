@@ -47,6 +47,9 @@ pub struct TimerSnapshot {
 struct TimerShared {
     elapsed_secs: u32,
     is_running: bool,
+    /// Total the ENGINE is currently counting down (lags settings while a round
+    /// is in flight). 0 = idle/unknown.
+    total_secs: u32,
 }
 
 // ---------------------------------------------------------------------------
@@ -82,6 +85,7 @@ impl TimerController {
         let shared = Arc::new(Mutex::new(TimerShared {
             elapsed_secs: 0,
             is_running: false,
+            total_secs: 0,
         }));
 
         // Clone handles for the event-listener thread.
@@ -149,7 +153,9 @@ impl TimerController {
     /// preserved — only the elapsed time is zeroed.
     pub fn restart_round(&self) {
         log::info!("[timer] restart round");
-        self.engine.send(TimerCommand::Reset);
+        // ResetRound (not Reset): zeroes this round without emitting
+        // timer:reset, so music and ambient keep playing.
+        self.engine.send(TimerCommand::ResetRound);
     }
 
     pub fn skip(&self) {
@@ -193,7 +199,11 @@ impl TimerController {
             round_type: seq.current_round.as_str().to_string(),
             previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
             elapsed_secs: shared.elapsed_secs,
-            total_secs: seq.current_duration_secs(&settings),
+            total_secs: if (shared.is_running || shared.elapsed_secs > 0) && shared.total_secs > 0 {
+                shared.total_secs
+            } else {
+                seq.current_duration_secs(&settings)
+            },
             is_running: shared.is_running,
             is_paused: !shared.is_running && shared.elapsed_secs > 0,
             work_round_number: seq.work_round_number,
@@ -252,7 +262,11 @@ fn listen_events(
         match event {
             TimerEvent::Started { total_secs } => {
                 log::info!("[timer] started total={total_secs}s");
-                shared.lock().unwrap().is_running = true;
+                {
+                    let mut sh = shared.lock().unwrap();
+                    sh.is_running = true;
+                    sh.total_secs = total_secs;
+                }
                 let _ = app.emit("timer:started", serde_json::json!({ "total_secs": total_secs }));
                 if let Some(ws) = app.try_state::<Arc<WsState>>() {
                     websocket::broadcast_started(&ws, total_secs);
@@ -265,6 +279,7 @@ fn listen_events(
                     let mut s = shared.lock().unwrap();
                     s.elapsed_secs = elapsed_secs;
                     s.is_running = true;
+                    s.total_secs = total_secs;
                 }
                 let _ = app.emit(
                     "timer:tick",
@@ -445,8 +460,8 @@ fn listen_events(
                 tray::update_menu_items(&tray, true, false);
             }
 
-            TimerEvent::Reset => {
-                log::debug!("[timer] idle");
+            TimerEvent::Reset { full } => {
+                log::debug!("[timer] reset full={full}");
                 // Abandon the active session (leave DB row as-is).
                 current_session_id = None;
 
@@ -456,9 +471,16 @@ fn listen_events(
                     s.is_running = false;
                 }
                 let snapshot = build_snapshot(&sequence, &settings, &shared);
-                let _ = app.emit("timer:reset", snapshot);
-                if let Some(ws) = app.try_state::<Arc<WsState>>() {
-                    websocket::broadcast_reset(&ws);
+                if full {
+                    // Genuine reset — the frontend stops music/ambient here.
+                    let _ = app.emit("timer:reset", snapshot);
+                    if let Some(ws) = app.try_state::<Arc<WsState>>() {
+                        websocket::broadcast_reset(&ws);
+                    }
+                } else {
+                    // "Restart current round": state sync only; must NOT stop
+                    // the music/ambient engines.
+                    let _ = app.emit("timer:snapshot", snapshot);
                 }
 
                 // Prime the engine with the current round's duration so the
@@ -515,7 +537,14 @@ fn build_snapshot(
         round_type: seq.current_round.as_str().to_string(),
         previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
         elapsed_secs: sh.elapsed_secs,
-        total_secs: seq.current_duration_secs(&s),
+        // While a round is in flight the ENGINE owns the total, so a settings
+        // change cannot drive the displayed remaining time negative; when
+        // idle, reflect the configured duration immediately.
+        total_secs: if (sh.is_running || sh.elapsed_secs > 0) && sh.total_secs > 0 {
+            sh.total_secs
+        } else {
+            seq.current_duration_secs(&s)
+        },
         is_running: sh.is_running,
         is_paused: !sh.is_running && sh.elapsed_secs > 0,
         work_round_number: seq.work_round_number,

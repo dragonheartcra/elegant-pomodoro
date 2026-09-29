@@ -3,6 +3,9 @@
 
   onMount(() => {
     const disableContextMenu = (event: MouseEvent) => {
+      // Allow the native context menu (cut/copy/paste) in text fields.
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
       event.preventDefault();
     };
 

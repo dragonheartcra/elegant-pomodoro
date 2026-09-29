@@ -34,6 +34,14 @@ use commands::{
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            // Second launch: focus the existing main window instead.
+            use tauri::Manager;
+            if let Some(win) = app.get_webview_window("main") {
+                let _ = win.show();
+                let _ = win.set_focus();
+            }
+        }))
         .plugin(
             LogBuilder::new()
                 .targets([Target::new(TargetKind::LogDir { file_name: None })])
@@ -48,8 +56,10 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             // Capture Rust panics to the log file before the process terminates.
-            std::panic::set_hook(Box::new(|info| {
+            let previous_hook = std::panic::take_hook();
+            std::panic::set_hook(Box::new(move |info| {
                 log::error!("PANIC: {info}");
+            previous_hook(info);
             }));
 
             let app_data_dir = app

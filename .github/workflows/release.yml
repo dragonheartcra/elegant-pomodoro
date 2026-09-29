@@ -235,7 +235,7 @@ jobs:
           path: |
             src-tauri/target/release/bundle/nsis/*-setup.exe
             src-tauri/target/release/bundle/nsis/*-setup.exe.sig
-            src-tauri/target/release/pomotroid.exe
+            src-tauri/target/release/elegant-pomodoro.exe
           if-no-files-found: error
 
   # ── Create draft GitHub Release ────────────────────────────────────────────
@@ -336,4 +336,4 @@ jobs:
             dist/macos/**/*.dmg
             dist/macos/**/*.app.tar.gz
             dist/windows/**/*-setup.exe
-            dist/windows/**/pomotroid.exe
+            dist/windows/**/elegant-pomodoro.exe

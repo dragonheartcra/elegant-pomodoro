@@ -68,6 +68,12 @@ body {
   color: var(--color-foreground);
   user-select: none;
 }
+
+  /* Inputs opt back into native text selection (the global none above is for chrome). */
+  input,
+  textarea {
+    user-select: text;
+  }
 
 /* ---------------------------------------------------------------------------
    Keyframes (available to all scoped component stylesheets)

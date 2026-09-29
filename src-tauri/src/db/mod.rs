@@ -61,7 +61,7 @@ fn try_open(db_path: &std::path::Path) -> Result<DbState> {
     let conn = Connection::open(db_path)?;
 
     // WAL mode: readers don't block writers and vice-versa.
-    conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")?;
+    conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;")?;
 
     migrations::run(&conn)?;
 

@@ -70,8 +70,10 @@
         detailed = await statsGetDetailed();
         await info(`[stats] initialized, theme=${activeTheme?.name ?? 'none'}`);
       } catch (e) {
-        await logError(`[stats] initialization failed: ${e}`);
-        throw e;
+        await logError(`initialization failed: ${e}`);
+        // Never leave an invisible window behind — show the UI in a
+        // degraded state so the user can still close it.
+        await getCurrentWebviewWindow().show().catch(() => {});
       }
 
       cleanups.push(

@@ -8,7 +8,9 @@
 
   let { state }: Props = $props();
 
-  let remaining = $derived(state.total_secs - state.elapsed_secs);
+  // Clamp at zero: a settings change mid-round can momentarily make
+  // total_secs < elapsed_secs (engine keeps the old total for this round).
+  let remaining = $derived(Math.max(0, state.total_secs - state.elapsed_secs));
   let minutes = $derived(Math.floor(remaining / 60));
   let seconds = $derived(remaining % 60);
   let display = $derived(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);

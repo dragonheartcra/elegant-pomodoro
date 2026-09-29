@@ -48,7 +48,21 @@
     return `calc(${frac} * (100% - 14px) + 7px)`;
   }
 
-  async function handleChange(dbKey: string, rawValue: number) {
+  // Debounced commit: sliders fire oninput per pixel; only the last value
+  // within 120ms is persisted, and onchange commits on release.
+  const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  function debouncedChange(key: string, value: number) {
+    clearTimeout(debounceTimers.get(key));
+    debounceTimers.set(
+      key,
+      setTimeout(() => {
+        debounceTimers.delete(key);
+        handleChange(key, value);
+      }, 120)
+    );
+  }
+
+async function handleChange(dbKey: string, rawValue: number) {
     const updated = await setSetting(dbKey, String(rawValue));
     settings.set(updated);
   }
@@ -132,6 +146,8 @@
         value={workMins}
         class="slider"
         oninput={(e) =>
+          debouncedChange('time_work_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+        onchange={(e) =>
           handleChange('time_work_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
       />
       <div class="bar bar--focus" style="width: {barWidth(workMins, 1, 90)}"></div>
@@ -196,6 +212,11 @@
           value={shortMins}
           class="slider"
           oninput={(e) =>
+            debouncedChange(
+              'time_short_break_secs',
+              (e.target as HTMLInputElement).valueAsNumber * 60
+            )}
+          onchange={(e) =>
             handleChange(
               'time_short_break_secs',
               (e.target as HTMLInputElement).valueAsNumber * 60
@@ -264,6 +285,8 @@
           value={longMins}
           class="slider"
           oninput={(e) =>
+            debouncedChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+          onchange={(e) =>
             handleChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
         />
         <div class="bar bar--long" style="width: {barWidth(longMins, 1, 90)}"></div>

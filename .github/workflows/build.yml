@@ -160,5 +160,5 @@ jobs:
           name: pomotroid-windows-x64
           path: |
             src-tauri/target/release/bundle/nsis/*-setup.exe
-            src-tauri/target/release/pomotroid.exe
+            src-tauri/target/release/elegant-pomodoro.exe
           if-no-files-found: error

@@ -30,7 +30,7 @@ from datetime import date, datetime, timedelta
 
 # ── Platform database path ────────────────────────────────────────────────────
 
-APP_ID = "com.splode.pomotroid"
+APP_ID = "com.elegant.pomodoro"
 DB_NAME = "pomotroid.db"
 
 

@@ -24,10 +24,18 @@
   // Remembered pre-mute level so the button can restore it on unmute.
   let premuteVolume = $state<number | null>(null);
 
-  function handleVolumeChange(e: Event) {
+  let volumeDebounce: ReturnType<typeof setTimeout> | undefined;
+
+  function handleVolumeInput(e: Event) {
     const val = (e.target as HTMLInputElement).valueAsNumber;
     localVolume = val;
-    setSetting('volume', String(Math.round(val * 100)));
+    clearTimeout(volumeDebounce);
+    volumeDebounce = setTimeout(() => void setSetting('volume', String(Math.round(val * 100))), 120);
+  }
+
+  function handleVolumeCommit(e: Event) {
+    clearTimeout(volumeDebounce);
+    void setSetting('volume', String(Math.round((e.target as HTMLInputElement).valueAsNumber * 100)));
   }
 
   function toggleMute() {
@@ -122,7 +130,8 @@
         max="1"
         step="0.01"
         value={localVolume}
-        oninput={handleVolumeChange}
+        oninput={handleVolumeInput}
+          onchange={handleVolumeCommit}
         class="volume-slider"
         aria-label="Volume"
       />

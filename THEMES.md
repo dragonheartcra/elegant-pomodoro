@@ -17,19 +17,19 @@ The directory is not created automatically. Make it once:
 **Linux**
 
 ```sh
-mkdir -p ~/.local/share/com.splode.pomotroid/themes
+mkdir -p ~/.local/share/com.elegant.pomodoro/themes
 ```
 
 **macOS**
 
 ```sh
-mkdir -p ~/Library/Application\ Support/com.splode.pomotroid/themes
+mkdir -p ~/Library/Application\ Support/com.elegant.pomodoro/themes
 ```
 
 **Windows** (PowerShell)
 
 ```powershell
-New-Item -ItemType Directory -Force "$env:APPDATA\com.splode.pomotroid\themes"
+New-Item -ItemType Directory -Force "$env:APPDATA\com.elegant.pomodoro\themes"
 ```
 
 ### 2. Create a theme file

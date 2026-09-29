@@ -237,6 +237,7 @@ pub fn settings_reset_defaults(
     db: State<'_, DbState>,
     timer: State<'_, TimerController>,
     tray_state: State<'_, Arc<TrayState>>,
+    ws_state: State<'_, Arc<WsState>>,
     app: AppHandle,
 ) -> Result<Settings, String> {
     log::info!("[settings] reset to defaults");
@@ -259,6 +260,32 @@ pub fn settings_reset_defaults(
         if !snap.is_running && !snap.is_paused {
             app.emit("timer:reset", &snap).ok();
         }
+    }
+
+    // Mirror the side effects settings_set performs, so "reset to defaults"
+    // leaves every subsystem consistent with the restored values.
+    if let Some(audio) = app.try_state::<Arc<AudioManager>>() {
+        audio.apply_settings(&new_settings);
+    }
+    if new_settings.verbose_logging {
+        log::set_max_level(LevelFilter::Debug);
+    } else {
+        log::set_max_level(LevelFilter::Info);
+    }
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.set_always_on_top(new_settings.always_on_top);
+    }
+    {
+        let ws = Arc::clone(&*ws_state);
+        let enabled = new_settings.websocket_enabled;
+        let port = new_settings.websocket_port;
+        let app_clone = app.clone();
+        tauri::async_runtime::spawn(async move {
+            websocket::stop(&ws).await;
+            if enabled {
+                websocket::start(port, app_clone, &ws).await;
+            }
+        });
     }
 
     // Reconcile the tray with the restored defaults (tray_icon_enabled=true),
@@ -461,27 +488,28 @@ pub fn audio_set_custom(
         })
         .unwrap_or_else(|| "mp3".to_string());
 
-    // Remove any existing custom file for this slot (preserves zero orphans).
+    // Copy to a temp name first, verify decodability, then atomically swap in —
+    // a failed copy (disk full, unreadable source) must not destroy the user's
+    // previously configured sound.
+    let temp = audio_dir.join(format!("{stem}.incoming.{ext}"));
+    std::fs::copy(src, &temp).map_err(|e| e.to_string())?;
+
+    if let Err(e) = audio::probe_audio_file(&temp) {
+        let _ = std::fs::remove_file(&temp);
+        return Err(e);
+    }
+
+    // Remove any old file (different extension) AFTER the new one is verified.
     if let Ok(entries) = std::fs::read_dir(&audio_dir) {
         for entry in entries.filter_map(|e| e.ok()) {
             let p = entry.path();
-            if p.file_stem().and_then(|s| s.to_str()) == Some(stem) {
+            if p.file_stem().and_then(|s| s.to_str()) == Some(stem) && p != temp {
                 let _ = std::fs::remove_file(&p);
             }
         }
     }
-
     let dest = audio_dir.join(format!("{stem}.{ext}"));
-    std::fs::copy(src, &dest).map_err(|e| e.to_string())?;
-
-    // Verify the copied file is decodable before committing. If it fails,
-    // clean up the orphan and sync in-memory state to default (the old file
-    // was already deleted above).
-    if let Err(e) = audio::probe_audio_file(&dest) {
-        let _ = std::fs::remove_file(&dest);
-        audio_state.clear_custom_path(&cue);
-        return Err(e);
-    }
+    std::fs::rename(&temp, &dest).map_err(|e| e.to_string())?;
 
     audio_state.set_custom_path(&cue, dest);
 

@@ -80,8 +80,10 @@
         // Show the window now that the theme is applied (avoids white flash)
         await getCurrentWebviewWindow().show();
       } catch (e) {
-        await logError(`[settings] initialization failed: ${e}`);
-        throw e;
+        await logError(`initialization failed: ${e}`);
+        // Never leave an invisible window behind — show the UI in a
+        // degraded state so the user can still close it.
+        await getCurrentWebviewWindow().show().catch(() => {});
       }
 
       // Live OS color scheme changes — re-resolve only in auto mode.

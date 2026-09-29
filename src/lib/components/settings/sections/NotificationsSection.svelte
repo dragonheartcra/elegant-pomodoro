@@ -84,9 +84,21 @@
     settings.set(updated);
   }
 
-  async function handleVolumeInput(e: Event) {
+  let volumeDebounce: ReturnType<typeof setTimeout> | undefined;
+
+  function handleVolumeInput(e: Event) {
     const val = (e.target as HTMLInputElement).valueAsNumber;
     localVolume = val;
+    clearTimeout(volumeDebounce);
+    volumeDebounce = setTimeout(() => void commitVolume(val), 120);
+  }
+
+  function handleVolumeChange(e: Event) {
+    clearTimeout(volumeDebounce);
+    void commitVolume((e.target as HTMLInputElement).valueAsNumber);
+  }
+
+  async function commitVolume(val: number) {
     const updated = await setSetting('volume', String(Math.round(val * 100)));
     settings.set(updated);
   }
@@ -187,6 +199,7 @@
         value={localVolume}
         class="slider"
         oninput={handleVolumeInput}
+          onchange={handleVolumeChange}
       />
       <div class="bar" style="width: {localVolume * 100}%"></div>
     </div>

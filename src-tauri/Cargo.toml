@@ -1,6 +1,6 @@
 [package]
 name = "elegant-pomodoro"
-version = "0.1.8"
+version = "0.1.9"
 description = "An elegant Pomodoro timer with music"
 authors = ["Christopher Murphy <flyweight@pm.me>"]
 edition = "2021"
@@ -25,6 +25,7 @@ log = "0.4"
 tauri-plugin-notification = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-dialog = "2"
+tauri-plugin-single-instance = "2"
 
 rusqlite = { version = "0.40", features = ["bundled"] }
 
@@ -36,7 +37,6 @@ axum = { version = "0.8", features = ["ws"] }
 futures-util = "0.3"
 
 rodio = { version = "0.22", default-features = false, features = ["playback", "wav", "mp3", "vorbis"] }
-symphonia-codec-adpcm = "0.6.0"
 tiny-skia = "0.12"
 notify = "8"
 

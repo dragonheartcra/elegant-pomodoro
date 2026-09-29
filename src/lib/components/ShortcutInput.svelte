@@ -36,6 +36,11 @@
     const key = codeToKey(e.code);
     if (!key) return;
 
+    // Global shortcuts must carry a modifier (or be a function key): a bare
+    // key registered system-wide would swallow normal typing everywhere.
+    const hasModifier = e.ctrlKey || e.shiftKey || e.altKey || e.metaKey;
+    if (!hasModifier && !/^F\d+$/.test(key)) return;
+
     const parts: string[] = [];
     if (e.ctrlKey) parts.push('Control');
     if (e.shiftKey) parts.push('Shift');

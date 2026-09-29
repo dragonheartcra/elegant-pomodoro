@@ -19,6 +19,9 @@ pub enum TimerCommand {
     Pause,
     Resume,
     Reset,
+    /// Zero the current round's elapsed time without rewinding the sequence.
+    /// Emits `Reset { full: false }` so the frontend does NOT stop music.
+    ResetRound,
     /// Immediately fires a `Complete` event (user-initiated skip).
     Skip,
     /// Change the total duration; moves engine to Idle so caller must Start.
@@ -40,7 +43,8 @@ pub enum TimerEvent {
     Complete { skipped: bool },
     Paused { elapsed_secs: u32 },
     Resumed { elapsed_secs: u32 },
-    Reset,
+    /// `full: true` = genuine reset (sequence rewound); `false` = current round only.
+    Reset { full: bool },
     Suspended { elapsed_secs: u32 },
 }
 
@@ -134,9 +138,14 @@ fn run_loop(
                 // the frontend and then sync the next-round duration. Without
                 // this handler the command would be silently swallowed,
                 // leaving the listener blocked in recv() and the UI stale.
+                Ok(TimerCommand::ResetRound) => {
+                    elapsed_secs = 0;
+                    let _ = event_tx.send(TimerEvent::Reset { full: false });
+                    Transition::To(Phase::Idle)
+                }
                 Ok(TimerCommand::Reset) => {
                     elapsed_secs = 0;
-                    let _ = event_tx.send(TimerEvent::Reset);
+                    let _ = event_tx.send(TimerEvent::Reset { full: true });
                     Transition::Stay
                 }
                 // Skip while Idle: advance to the next round without starting.
@@ -162,9 +171,14 @@ fn run_loop(
                         ticks: 0,
                     }))
                 }
+                Ok(TimerCommand::ResetRound) => {
+                    elapsed_secs = 0;
+                    let _ = event_tx.send(TimerEvent::Reset { full: false });
+                    Transition::To(Phase::Idle)
+                }
                 Ok(TimerCommand::Reset) => {
                     elapsed_secs = 0;
-                    let _ = event_tx.send(TimerEvent::Reset);
+                    let _ = event_tx.send(TimerEvent::Reset { full: true });
                     Transition::To(Phase::Idle)
                 }
                 Ok(TimerCommand::Skip) => {
@@ -225,9 +239,14 @@ fn run_loop(
                         let _ = event_tx.send(TimerEvent::Complete { skipped: true });
                         Transition::To(Phase::Idle)
                     }
+                    Ok(TimerCommand::ResetRound) => {
+                        elapsed_secs = 0;
+                        let _ = event_tx.send(TimerEvent::Reset { full: false });
+                        Transition::To(Phase::Idle)
+                    }
                     Ok(TimerCommand::Reset) => {
                         elapsed_secs = 0;
-                        let _ = event_tx.send(TimerEvent::Reset);
+                        let _ = event_tx.send(TimerEvent::Reset { full: true });
                         Transition::To(Phase::Idle)
                     }
                     Ok(TimerCommand::Reconfigure { duration_secs: d }) => {
@@ -422,7 +441,7 @@ mod tests {
 
         let events = drain(&rx);
         assert!(
-            events.iter().any(|e| matches!(e, TimerEvent::Reset)),
+            events.iter().any(|e| matches!(e, TimerEvent::Reset { .. })),
             "expected Reset event"
         );
         // No Complete should have fired.
@@ -530,7 +549,7 @@ mod tests {
 
         let events = drain(&rx);
         assert!(
-            events.iter().any(|e| matches!(e, TimerEvent::Reset)),
+            events.iter().any(|e| matches!(e, TimerEvent::Reset { .. })),
             "Reset while Idle must emit a Reset event"
         );
     }

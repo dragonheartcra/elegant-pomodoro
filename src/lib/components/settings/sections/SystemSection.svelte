@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { settings } from '$lib/stores/settings';
-  import { setSetting, resetSettings, clearSessionHistory, traySupported } from '$lib/ipc';
+  import { setSetting, resetSettings, clearSessionHistory, traySupported, onWebsocketError } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
   import { setLocale } from '$lib/locale.svelte.js';
@@ -24,8 +24,16 @@
   // is hidden entirely when the library is absent so users can't enable a
   // feature that would crash the app.  Non-Linux platforms always support tray.
   let trayAvailable = $state(!isLinux);
-  onMount(async () => {
-    if (isLinux) trayAvailable = await traySupported();
+  let websocketError = $state('');
+  onMount(() => {
+    let unlisten: (() => void) | undefined;
+    (async () => {
+      if (isLinux) trayAvailable = await traySupported();
+      unlisten = await onWebsocketError((payload) => {
+        websocketError = payload.message;
+      });
+    })();
+    return () => unlisten?.();
   });
 
   let localPort = $state(String($settings.websocket_port));
@@ -94,8 +102,15 @@
     description={m.system_toggle_websocket_desc({ port: $settings.websocket_port })}
     tooltip={m.tooltip_websocket()}
     checked={$settings.websocket_enabled}
-    onclick={() => toggle('websocket_enabled', $settings.websocket_enabled)}
+    onclick={() => {
+      websocketError = '';
+      toggle('websocket_enabled', $settings.websocket_enabled);
+    }}
   />
+
+  {#if $settings.websocket_enabled && websocketError}
+    <p class="ws-error">WebSocket: {websocketError}</p>
+  {/if}
 
   {#if $settings.websocket_enabled}
     <div class="row">
@@ -370,6 +385,12 @@
 
   .chevron.open {
     transform: rotate(180deg);
+  }
+
+  .ws-error {
+    color: var(--color-focus-round);
+    font-size: 0.8rem;
+    font-weight: 600;
   }
 
   .lang-menu {

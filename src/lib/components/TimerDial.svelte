@@ -32,7 +32,8 @@
 
   $effect(() => {
     const rt = snap.round_type;
-    const progress = snap.total_secs > 0 ? snap.elapsed_secs / snap.total_secs : 0;
+    const raw_progress = snap.total_secs > 0 ? snap.elapsed_secs / snap.total_secs : 0;
+    const progress = Math.min(1, Math.max(0, raw_progress));
 
     // Elapsed mode: arc grows from empty → full (offset counts down to 0).
     // Countdown mode: arc shrinks from full → empty (offset counts up to CIRCUMFERENCE).

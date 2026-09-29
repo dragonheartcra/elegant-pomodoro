@@ -56,6 +56,22 @@ export function createLocalShortcutHandler(state: LocalShortcutState): (e: Keybo
     // Skip bare modifier keys.
     if (MODIFIER_KEYS.has(e.key)) return;
 
+    // Ignore auto-repeat (holding a key fires a storm of toggles) and
+    // Ctrl/Alt/Meta combos, which belong to the OS or the app itself.
+    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+
+    // Ignore auto-repeat (holding a key fires a storm of toggles) and
+    // Ctrl/Alt/Meta combos, which belong to the OS or the app itself.
+    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+
+    // Ignore auto-repeat (holding a key fires a storm of toggles) and
+    // Ctrl/Alt/Meta combos, which belong to the OS or the app itself.
+    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+
+    // Ignore auto-repeat (holding a key fires a storm of toggles) and
+    // Ctrl/Alt/Meta combos, which belong to the OS or the app itself.
+    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+
     const s = state.getSettings();
     const key = e.key;
 
