@@ -1,6 +1,6 @@
 [package]
 name = "elegant-pomodoro"
-version = "0.1.10"
+version = "0.1.11"
 description = "An elegant Pomodoro timer with music"
 authors = ["dragonheartcra"]
 edition = "2021"

@@ -75,16 +75,16 @@
 </Tooltip>
 
 <!-- Volume -->
+<!-- Hover is judged on the whole wrapper (button + popup) so moving the
+     pointer from the button into the slider never dismisses it. -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="volume-wrapper">
+<div
+  class="volume-wrapper"
+  onmouseenter={() => (showVolume = true)}
+  onmouseleave={() => (showVolume = false)}
+>
   <Tooltip text={localVolume === 0 ? m.tooltip_unmute() : m.tooltip_mute()}>
-    <button
-      class="btn-icon"
-      onclick={toggleMute}
-      aria-label={localVolume === 0 ? 'Unmute' : 'Mute'}
-      onmouseenter={() => (showVolume = true)}
-      onmouseleave={() => (showVolume = false)}
-    >
+    <button class="btn-icon" onclick={toggleMute} aria-label={localVolume === 0 ? 'Unmute' : 'Mute'}>
       {#if localVolume === 0}
         <svg width="16" height="16" viewBox="0 0 16 16">
           <polygon points="1,5 5,5 10,1 10,15 5,11 1,11" fill="currentColor" />

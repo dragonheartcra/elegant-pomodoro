@@ -129,7 +129,8 @@ function getAudio(): HTMLAudioElement {
 }
 
 function applyVolume() {
-  const v = get(settings).music_volume;
+  // Master volume (FR-2.13): one slider drives cues, music and ambient.
+  const v = get(settings).volume;
   if (v !== lastAppliedVolume) {
     lastAppliedVolume = v;
     getAudio().volume = v;

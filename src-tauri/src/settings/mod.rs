@@ -69,7 +69,7 @@ pub struct Settings {
     /// FlowTunes channel slug played during short/long breaks. Empty = no music.
     pub music_channel_break: String,
     /// Music volume in the 0.0–1.0 range (stored 0–100).
-    pub music_volume: f32,
+    pub ambient_ratio: f32,
     /// Whether music keeps playing during breaks.
     pub music_on_break: bool,
     /// JSON array of selected ambient loop ids, e.g. `["rain","fire"]`.
@@ -136,7 +136,7 @@ impl Default for Settings {
             window_height: None,
             music_channel_work: "chill-lo-fi-beats".to_string(),
             music_channel_break: "jazz-whispers".to_string(),
-            music_volume: 0.75,
+            ambient_ratio: 1.0,
             music_on_break: true,
             ambient_selected: "[]".to_string(),
             ambient_volumes: "{}".to_string(),
@@ -273,9 +273,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
             .cloned()
             .unwrap_or(d.music_channel_break),
         // DB stores 0–100; convert to 0.0–1.0.
-        music_volume: (parse_u32(&map, "music_volume", (d.music_volume * 100.0) as u32) as f32
-            / 100.0)
-            .clamp(0.0, 1.0),
+        ambient_ratio: (parse_u32(&map, "ambient_ratio", 100) as f32 / 100.0).clamp(0.0, 1.0),
         music_on_break: parse_bool(&map, "music_on_break", d.music_on_break),
         ambient_selected: map
             .get("ambient_selected")

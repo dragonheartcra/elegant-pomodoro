@@ -59,7 +59,7 @@ export interface Settings {
   music_channel_work: string;
   /** FlowTunes channel slug played during breaks. Empty = no music. */
   music_channel_break: string;
-  music_volume: number; // 0.0–1.0
+  ambient_ratio: number; // 0.0–1.0
   music_on_break: boolean;
   /** JSON array string of selected ambient loop ids. */
   ambient_selected: string;

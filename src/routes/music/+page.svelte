@@ -86,21 +86,35 @@
     await emitMusicCommand('preview', slug);
   }
 
-  async function setMusicVolume(v: number) {
-    const updated = await setSetting('music_volume', String(Math.round(v * 100)));
+  async function setMasterVolume(v: number) {
+    const updated = await setSetting('volume', String(Math.round(v * 100)));
     settings.set(updated);
   }
 
   // Slider drags fire oninput per tick — debounce the IPC round-trips, and
   // commit immediately on release (onchange) so the final value always lands.
   let volumeTimer: ReturnType<typeof setTimeout> | undefined;
-  function onMusicVolumeInput(v: number) {
+  function onMasterVolumeInput(v: number) {
     clearTimeout(volumeTimer);
-    volumeTimer = setTimeout(() => setMusicVolume(v), 120);
+    volumeTimer = setTimeout(() => setMasterVolume(v), 120);
   }
-  function onMusicVolumeChange(v: number) {
+  function onMasterVolumeChange(v: number) {
     clearTimeout(volumeTimer);
-    void setMusicVolume(v);
+    void setMasterVolume(v);
+  }
+
+  async function setAmbientRatio(v: number) {
+    const updated = await setSetting('ambient_ratio', String(Math.round(v * 100)));
+    settings.set(updated);
+  }
+  let ratioTimer: ReturnType<typeof setTimeout> | undefined;
+  function onAmbientRatioInput(v: number) {
+    clearTimeout(ratioTimer);
+    ratioTimer = setTimeout(() => setAmbientRatio(v), 120);
+  }
+  function onAmbientRatioChange(v: number) {
+    clearTimeout(ratioTimer);
+    void setAmbientRatio(v);
   }
 
   const loopVolumeTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -293,10 +307,10 @@
           min="0"
           max="1"
           step="0.01"
-          value={$settings.music_volume}
-          oninput={(e) => onMusicVolumeInput(Number(e.currentTarget.value))}
-          onchange={(e) => onMusicVolumeChange(Number(e.currentTarget.value))}
-          aria-label={m.music_volume()}
+          value={$settings.volume}
+          oninput={(e) => onMasterVolumeInput(Number(e.currentTarget.value))}
+          onchange={(e) => onMasterVolumeChange(Number(e.currentTarget.value))}
+          aria-label={m.music_master_volume()}
         />
       </div>
 
@@ -369,6 +383,21 @@
               {pickerOpen ? m.ambient_hide() : m.ambient_add()}
             </button>
           </div>
+        </div>
+
+        <!-- Ambient level: final loudness = master volume × this ratio × per-sound volume -->
+        <div class="amb-ratio">
+          <span class="amb-ratio-label">{m.music_ambient_ratio()}</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={$settings.ambient_ratio}
+            oninput={(e) => onAmbientRatioInput(Number(e.currentTarget.value))}
+            onchange={(e) => onAmbientRatioChange(Number(e.currentTarget.value))}
+            aria-label={m.music_ambient_ratio()}
+          />
         </div>
 
         {#if !pickerOpen}
@@ -680,6 +709,28 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+
+  .amb-ratio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--color-background-light);
+    border-radius: 6px;
+  }
+
+  .amb-ratio-label {
+    font-size: 0.78rem;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    white-space: nowrap;
+  }
+
+  .amb-ratio input[type='range'] {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--color-accent);
+    cursor: pointer;
   }
 
   .amb-head {

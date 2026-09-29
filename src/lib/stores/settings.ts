@@ -44,7 +44,7 @@ const defaults: Settings = {
   local_shortcut_fullscreen: 'F11',
   music_channel_work: 'chill-lo-fi-beats',
   music_channel_break: 'jazz-whispers',
-  music_volume: 0.75,
+  ambient_ratio: 1.0,
   music_on_break: true,
   ambient_selected: '[]',
   ambient_volumes: '{}',

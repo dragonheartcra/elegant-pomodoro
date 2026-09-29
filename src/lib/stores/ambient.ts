@@ -38,6 +38,14 @@ function volumeOf(id: string): number {
   }
 }
 
+/** Final loop loudness: master volume × ambient ratio × per-sound volume (FR-2.13). */
+function effectiveVolumeOf(id: string): number {
+  const s = get(settings);
+  const master = Math.min(1, Math.max(0, s.volume));
+  const ratio = Math.min(1, Math.max(0, s.ambient_ratio));
+  return master * ratio * volumeOf(id);
+}
+
 /** Reconcile instances with settings: add/remove loops, apply volumes. */
 function sync() {
   const selected = selectedIds();
@@ -52,7 +60,7 @@ function sync() {
     if (!instances.has(id)) {
       const el = new Audio(loopUrl(id));
       el.loop = true;
-      el.volume = volumeOf(id);
+      el.volume = effectiveVolumeOf(id);
       el.addEventListener('error', () => {
         void logError(`[ambient] loop failed to load: ${id}`);
       });
@@ -60,7 +68,7 @@ function sync() {
     }
   }
   for (const [id, el] of instances) {
-    el.volume = volumeOf(id);
+    el.volume = effectiveVolumeOf(id);
   }
 
   if (shouldPlay) void playAll();
