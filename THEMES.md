@@ -77,7 +77,7 @@ All values must be CSS hex colors (`#rrggbb` or `#rrggbbaa`).
 
 ## Hot-reload
 
-Pomotroid watches the themes directory while running. Saving a file — including edits to an existing theme — updates the Appearance picker within half a second. There is no need to reopen settings or restart the app.
+Elegant Pomodoro watches the themes directory while running. Saving a file — including edits to an existing theme — updates the Appearance picker within half a second. There is no need to reopen settings or restart the app.
 
 ## Overriding a built-in theme
 

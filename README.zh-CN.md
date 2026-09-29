@@ -72,9 +72,11 @@ npm run tauri build    # 产出安装包到 src-tauri/target/release/bundle/
 
 ## 音乐数据说明
 
-仓库内置的频道目录与运行时流式播放的音频均属于
-[FlowTunes](https://flowtunes.app)，此处仅作个人非商业用途使用。如果你喜欢
-这些音乐，请支持原服务。如需在其他项目中转载这些数据，请先开 issue 沟通。
+仓库内置的频道目录、环境音列表、频道图标与运行时流式播放的音频均属于
+[FlowTunes](https://flowtunes.app)，此处仅作个人非商业用途使用，详见
+[static/flowtunes/NOTICE.md](static/flowtunes/NOTICE.md)。这部分内容不受本
+仓库 MIT 许可证覆盖。如果你喜欢这些音乐，请支持原服务。如需在其他项目中
+转载这些数据，请先开 issue 沟通。
 
 ## 许可证
 
@@ -83,3 +85,5 @@ npm run tauri build    # 产出安装包到 src-tauri/target/release/bundle/
 - 计时核心与设计语言：fork 自
   [Pomotroid](https://github.com/Splode/pomotroid)，© 2018 Christopher Murphy。
 - FlowTunes 频道数据与流式音频：版权归 FlowTunes 所有（见上方说明）。
+- 字体：[Mona Sans](https://github.com/github/mona-sans)，© GitHub，采用
+  [SIL Open Font License 1.1](static/fonts/OFL.txt) 授权。

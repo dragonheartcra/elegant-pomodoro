@@ -76,9 +76,11 @@ npm run tauri build    # produce installers in src-tauri/target/release/bundle/
 
 ## Music data notice
 
-The bundled channel catalog and the streamed audio belong to
-[FlowTunes](https://flowtunes.app) and are used here for personal,
-non-commercial purposes. If you enjoy the music, please support the original
+The bundled channel catalog, ambient sound list, channel icons and the
+streamed audio belong to [FlowTunes](https://flowtunes.app) and are used here
+for personal, non-commercial purposes — see
+[static/flowtunes/NOTICE.md](static/flowtunes/NOTICE.md). They are not covered
+by the MIT license. If you enjoy the music, please support the original
 service. Open an issue before redistributing this data elsewhere.
 
 ## License
@@ -88,3 +90,5 @@ Elegant Pomodoro is [MIT](LICENSE) licensed.
 - Timer core and design language: forked from
   [Pomotroid](https://github.com/Splode/pomotroid) © 2018 Christopher Murphy.
 - FlowTunes channel data and streamed audio: © FlowTunes (see notice above).
+- Fonts: [Mona Sans](https://github.com/github/mona-sans) © GitHub, licensed
+  under the [SIL Open Font License 1.1](static/fonts/OFL.txt).
