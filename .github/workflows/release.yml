@@ -97,7 +97,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release, universal binary)
-        run: npm run tauri build -- --bundles app,dmg --target universal-apple-darwin
+        run: npm run tauri build -- --bundles dmg --target universal-apple-darwin
         env:
           CI: true
 
@@ -107,7 +107,6 @@ jobs:
           name: elegant-pomodoro-macos-universal
           path: |
             src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
           if-no-files-found: error
 
   # ── Windows build ──────────────────────────────────────────────────────────

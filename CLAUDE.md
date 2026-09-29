@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Pomotroid is a Pomodoro timer desktop app built with **Tauri 2 + Rust** (backend) and **SvelteKit + Svelte 5** (frontend). The app has been fully rewritten from Electron+Vue to this stack.
+Elegant Pomodoro is a Pomodoro timer desktop app built with **Tauri 2 + Rust** (backend) and **SvelteKit + Svelte 5** (frontend). The app has been fully rewritten from Electron+Vue to this stack.
 
 ## Commands
 

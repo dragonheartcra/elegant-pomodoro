@@ -4,6 +4,9 @@
   "description": "An elegant Pomodoro timer with music",
   "author": "dragonheartcra",
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite dev",

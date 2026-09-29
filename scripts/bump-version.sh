@@ -84,8 +84,8 @@ echo "  ✓ src-tauri/Cargo.lock (refreshed)"
 
 CHANGELOG="CHANGELOG.md"
 # Replace the [Unreleased] header with [vX.Y.Z] - YYYY-MM-DD
-sed -i "s/^## \[Unreleased\]/## [v${VERSION}] - ${DATE}/" "$CHANGELOG"
-echo "  ✓ ${CHANGELOG} ([Unreleased] → [v${VERSION}] - ${DATE})"
+sed -i "s/^## \[Unreleased\]/## [${VERSION}] - ${DATE}/" "$CHANGELOG"
+echo "  ✓ ${CHANGELOG} ([Unreleased] → [${VERSION}] - ${DATE})"
 
 # ── Git commit + tag ──────────────────────────────────────────────────────────
 

@@ -6,7 +6,7 @@
   import * as m from '$paraglide/messages.js';
 
   const BASE_VERSION = '0.1.0';
-  const SOURCE_REPO = 'https://github.com/Splode/pomotroid';
+  const SOURCE_REPO = 'https://github.com/dragonheartcra/elegant-pomodoro';
 
   let version = $state('...');
 
