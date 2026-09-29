@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 /// All user-configurable settings, fully typed.
 ///
-/// Time fields are in **seconds** (converted from stored minutes).
+/// Time fields are in **seconds** (DB stores seconds directly since MIGRATION_2).
 /// `volume` is in the **0.0–1.0** range (converted from stored 0–100).
 ///
 /// This struct is serialized to JSON and sent to the Svelte frontend via Tauri IPC.
@@ -47,7 +47,6 @@ pub struct Settings {
     pub websocket_port: u16,
     pub language: String,
     pub verbose_logging: bool,
-    pub check_for_updates: bool,
     pub global_shortcuts_enabled: bool,
     /// Local shortcut key bindings (KeyboardEvent.key strings, frontend-only).
     pub local_shortcut_toggle: String,
@@ -123,7 +122,6 @@ impl Default for Settings {
             websocket_port: 1314,
             language: "auto".to_string(),
             verbose_logging: false,
-            check_for_updates: false,
             global_shortcuts_enabled: false,
             local_shortcut_toggle: " ".to_string(),
             local_shortcut_reset: "ArrowLeft".to_string(),
@@ -254,7 +252,6 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         websocket_port: parse_u32(&map, "websocket_port", d.websocket_port as u32) as u16,
         language: map.get("language").cloned().unwrap_or(d.language),
         verbose_logging: parse_bool(&map, "verbose_logging", d.verbose_logging),
-        check_for_updates: parse_bool(&map, "check_for_updates", d.check_for_updates),
         global_shortcuts_enabled: parse_bool(&map, "global_shortcuts_enabled", d.global_shortcuts_enabled),
         local_shortcut_toggle: map.get("local_shortcut_toggle").cloned().unwrap_or(d.local_shortcut_toggle),
         local_shortcut_reset: map.get("local_shortcut_reset").cloned().unwrap_or(d.local_shortcut_reset),

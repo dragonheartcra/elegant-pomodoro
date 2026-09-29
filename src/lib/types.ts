@@ -47,7 +47,6 @@ export interface Settings {
   dial_countdown: boolean;
   language: string; // 'auto' | 'en' | 'es' | 'fr' | 'de' | 'ja'
   verbose_logging: boolean;
-  check_for_updates: boolean;
   global_shortcuts_enabled: boolean;
   local_shortcut_toggle: string;
   local_shortcut_reset: string;

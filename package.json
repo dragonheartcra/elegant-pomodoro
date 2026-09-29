@@ -1,15 +1,9 @@
 {
   "name": "elegant-pomodoro",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "An elegant Pomodoro timer with music",
-  "author": {
-    "email": "flyweight@pm.me",
-    "name": "Christopher Murphy",
-    "url": "https://github.com/splode"
-  },
-  "homepage": "https://github.com/Splode/pomotroid",
+  "author": "dragonheartcra",
   "license": "MIT",
-  "repository": "github:splode/pomotroid",
   "type": "module",
   "scripts": {
     "dev": "vite dev",

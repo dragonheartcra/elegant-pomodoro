@@ -1,4 +1,4 @@
-// Local keyboard shortcuts — active while any Pomotroid window has focus.
+// Local keyboard shortcuts — active while any Elegant Pomodoro window has focus.
 // Bindings are plain KeyboardEvent.key strings (e.g. " ", "ArrowLeft", "F11").
 // The handler is created via a factory so it can read reactive state by closure.
 

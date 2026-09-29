@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seed the Pomotroid database with realistic historical session data.
+"""Seed the Elegant Pomodoro database with realistic historical session data.
 
 Usage:
     python3 scripts/seed-db.py [options]
@@ -16,7 +16,7 @@ short breaks, and long breaks — with natural weekday/weekend variation,
 streaks, and quiet periods. Sessions are in proper 4-work-per-cycle order
 matching Pomotroid's default sequence.
 
-The database must already exist (launch Pomotroid at least once first).
+The database must already exist (launch Elegant Pomodoro at least once first).
 """
 
 import argparse
@@ -115,7 +115,7 @@ def generate_sessions(days: int, rng: random.Random) -> list[dict]:
                         sessions.append(make_session(ts, SHORT_SECS, "short-break"))
                     ts += SHORT_SECS
 
-            # Brief gap between cycles (5–20 min of non-Pomotroid time)
+            # Brief gap between cycles (5–20 min of non-focus time)
             if not is_last_cycle:
                 ts += rng.randint(5, 20) * 60
 
@@ -160,7 +160,7 @@ def seed(db_path: str, sessions: list[dict], *, clear: bool, dry_run: bool) -> N
     if not os.path.exists(db_path):
         print(
             f"\nError: database not found at:\n  {db_path}\n"
-            "Launch Pomotroid at least once to create the database, then re-run.",
+            "Launch Elegant Pomodoro at least once to create the database, then re-run.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -178,7 +178,7 @@ def seed(db_path: str, sessions: list[dict], *, clear: bool, dry_run: bool) -> N
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Seed the Pomotroid database with test session history.",
+        description="Seed the Elegant Pomodoro database with test session history.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__.strip(),
     )
